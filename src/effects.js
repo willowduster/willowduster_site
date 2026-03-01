@@ -74,14 +74,16 @@ export function initVhsGlitch() {
 }
 
 // ── Floating Particles ────────────────────────────────────────────────────────
+// Named constant for particle count — increase for more visual intensity
+const PARTICLE_COUNT = 35
+
 export function initParticles() {
   const container = document.getElementById('particles')
   if (!container) return
 
   const colors = ['#ff00ff', '#00ffff', '#9d00ff', '#00ff41', '#ff6b35']
-  const count  = 35
 
-  for (let i = 0; i < count; i++) {
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
     const p = document.createElement('div')
     p.className = 'particle'
     const size  = 2 + Math.random() * 3
@@ -116,13 +118,15 @@ export function initTypingEffect(element, text, speed = 60) {
   }, speed)
 }
 
-// ── CRT Flicker ───────────────────────────────────────────────────────────────
+// Named timing constants for CRT flicker scheduling
+const MIN_FLICKER_DELAY = 5000   // ms — minimum gap between flickers
+const MAX_FLICKER_DELAY = 15000  // ms — additional random jitter on top
 export function initCrtFlicker() {
   const crt = document.querySelector('.crt-overlay')
   if (!crt) return
   // Occasionally make the whole screen flicker slightly
   function flicker() {
-    const delay = 5000 + Math.random() * 15000
+    const delay = MIN_FLICKER_DELAY + Math.random() * MAX_FLICKER_DELAY
     setTimeout(() => {
       document.body.style.opacity = '0.85'
       setTimeout(() => {

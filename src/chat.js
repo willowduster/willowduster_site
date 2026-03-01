@@ -3,7 +3,7 @@
  */
 import { CONFIG } from './config.js'
 
-const MAX_MESSAGES = 200
+const MAX_MESSAGES = CONFIG.chatMaxMessages ?? 200
 let ws = null
 let activeTab = 'all'
 

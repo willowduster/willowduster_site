@@ -15,6 +15,13 @@ export const CONFIG = {
   // Twitch — replace with your Twitch channel name
   twitchChannel: 'willowduster',
 
+  // HLS player tuning
+  hlsBackBufferLength: 30,     // seconds of back-buffer to retain
+  hlsLowLatencyMode:   true,   // enable LL-HLS for minimum delay
+
+  // Chat history limit (messages kept per feed before oldest is trimmed)
+  chatMaxMessages: 200,
+
   // Site branding
   siteTitle:    'WILLOWDUSTER',
   siteSubtitle: 'LIVE DJ SET // CYBERPUNK FREQUENCIES',

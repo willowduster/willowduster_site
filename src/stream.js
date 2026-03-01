@@ -19,9 +19,9 @@ function initHlsPlayer() {
 
   if (Hls.isSupported()) {
     hlsInstance = new Hls({
-      enableWorker:      true,
-      lowLatencyMode:    true,
-      backBufferLength:  30,
+      enableWorker:     true,
+      lowLatencyMode:   CONFIG.hlsLowLatencyMode,
+      backBufferLength: CONFIG.hlsBackBufferLength,
     })
     hlsInstance.loadSource(CONFIG.owncastHlsUrl)
     hlsInstance.attachMedia(video)
