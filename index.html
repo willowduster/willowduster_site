@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WILLOWDUSTER — Live DJ Stream</title>
+  <meta name="description" content="WillowDuster — Live DJ Sets, Cyberpunk Frequencies" />
+  <meta name="theme-color" content="#0a0a0f" />
+
+  <!-- Open Graph -->
+  <meta property="og:title"       content="WILLOWDUSTER" />
+  <meta property="og:description" content="Live DJ Sets // Cyberpunk Frequencies" />
+  <meta property="og:type"        content="website" />
+
+  <!-- Preconnect for Google Fonts (loaded via CSS) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+</head>
+<body>
+
+  <!-- ── Background Layers ────────────────────────────────────────────── -->
+  <canvas id="matrix-canvas" aria-hidden="true"></canvas>
+  <div class="grid-bg"    aria-hidden="true"></div>
+  <div id="particles"     aria-hidden="true"></div>
+  <div class="crt-overlay" aria-hidden="true"></div>
+
+  <!-- ── App Shell ─────────────────────────────────────────────────────── -->
+  <div id="app">
+
+    <!-- ── Header ─────────────────────────────────────────────────────── -->
+    <header role="banner">
+      <div class="header-left">
+        <h1 id="site-title">WILLOWDUSTER</h1>
+        <p  id="site-subtitle"></p>
+      </div>
+
+      <nav aria-label="Primary navigation">
+        <a href="#stream">STREAM</a>
+        <a href="#chat">CHAT</a>
+        <a href="https://stream.willowduster.com" target="_blank" rel="noopener">OWNCAST</a>
+      </nav>
+
+      <div class="header-right">
+        <!-- Login buttons -->
+        <div id="login-panel" role="group" aria-label="Social login options">
+          <button class="social-login-btn" data-platform="twitch"    aria-label="Login with Twitch">⬛ TWITCH</button>
+          <button class="social-login-btn" data-platform="youtube"   aria-label="Login with YouTube">▶ YOUTUBE</button>
+          <button class="social-login-btn" data-platform="instagram" aria-label="Login with Instagram">◈ INSTAGRAM</button>
+          <button class="social-login-btn" data-platform="x"         aria-label="Login with X">✕ X</button>
+        </div>
+
+        <!-- Logged-in state (hidden until auth) -->
+        <div id="user-display" role="status" aria-live="polite">
+          <span>⚡</span>
+          <span id="user-name"></span>
+          <button id="logout-btn">LOGOUT</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- ── Main ───────────────────────────────────────────────────────── -->
+    <main id="stream">
+      <!-- ── Stream Column ─────────────────────────────────────────── -->
+      <section class="stream-column" aria-label="Stream player">
+
+        <!-- Stream source tabs -->
+        <div class="stream-tabs" role="tablist" aria-label="Stream source">
+          <button class="stream-tab-btn active" data-stream="owncast"  role="tab" aria-selected="true"  aria-controls="panel-owncast">⬡ OWNCAST</button>
+          <button class="stream-tab-btn"        data-stream="youtube"  role="tab" aria-selected="false" aria-controls="panel-youtube">▶ YOUTUBE</button>
+          <button class="stream-tab-btn"        data-stream="twitch"   role="tab" aria-selected="false" aria-controls="panel-twitch">⬛ TWITCH</button>
+        </div>
+
+        <!-- Player area -->
+        <div class="player-wrapper" aria-label="Video player">
+
+          <!-- Owncast HLS panel -->
+          <div id="panel-owncast" class="stream-panel" role="tabpanel" aria-label="Owncast stream">
+            <video
+              id="owncast-video"
+              controls
+              playsinline
+              muted
+              aria-label="Owncast live stream video">
+            </video>
+
+            <!-- Offline / loading overlay -->
+            <div id="stream-offline" role="status" aria-live="polite">
+              <div class="offline-icon">📡</div>
+              <p class="offline-text">SIGNAL LOST</p>
+              <p class="offline-sub">Stream offline or HLS URL not configured</p>
+            </div>
+          </div>
+
+          <!-- YouTube panel -->
+          <div id="panel-youtube" class="stream-panel" role="tabpanel" aria-label="YouTube stream" style="display:none;">
+            <!--
+              Configure youtubeLiveUrl in src/config.js
+              Replace UCxxxxxxxx with your YouTube Channel ID
+            -->
+            <iframe
+              id="youtube-iframe"
+              src="about:blank"
+              data-src="https://www.youtube.com/embed/live_stream?channel=UCxxxxxxxx&autoplay=1"
+              allow="autoplay; fullscreen"
+              allowfullscreen
+              title="YouTube Live Stream">
+            </iframe>
+          </div>
+
+          <!-- Twitch panel -->
+          <div id="panel-twitch" class="stream-panel" role="tabpanel" aria-label="Twitch stream" style="display:none;">
+            <!--
+              Configure twitchChannel in src/config.js
+              parent must match your deployment domain for Twitch embeds
+            -->
+            <iframe
+              id="twitch-iframe"
+              src="about:blank"
+              data-src="https://player.twitch.tv/?channel=willowduster&parent=willowduster.github.io"
+              allow="autoplay; fullscreen"
+              allowfullscreen
+              title="Twitch Live Stream">
+            </iframe>
+          </div>
+
+        </div><!-- /.player-wrapper -->
+
+        <!-- Stream metadata bar -->
+        <div class="stream-info" aria-label="Stream information">
+          <span class="live-badge" aria-label="Live">● LIVE</span>
+          <span class="stream-url" id="stream-url-display">stream.willowduster.com</span>
+          <span style="margin-left:auto; color:var(--dim); font-size:10px;">HLS // LOW LATENCY</span>
+        </div>
+
+      </section><!-- /.stream-column -->
+
+      <!-- ── Chat Column ────────────────────────────────────────────── -->
+      <aside class="chat-column" id="chat" aria-label="Live chat">
+
+        <div class="chat-header">
+          <p class="chat-title">⬡ UNIFIED CHAT</p>
+          <!-- Chat source tabs -->
+          <div class="chat-tabs" role="tablist" aria-label="Chat source">
+            <button class="chat-tab-btn active" data-tab="all"     role="tab" aria-selected="true"  aria-controls="chat-feed-all">ALL</button>
+            <button class="chat-tab-btn"        data-tab="owncast" role="tab" aria-selected="false" aria-controls="chat-feed-owncast">OWNCAST</button>
+            <button class="chat-tab-btn"        data-tab="youtube" role="tab" aria-selected="false" aria-controls="chat-feed-youtube">YOUTUBE</button>
+            <button class="chat-tab-btn"        data-tab="twitch"  role="tab" aria-selected="false" aria-controls="chat-feed-twitch">TWITCH</button>
+          </div>
+        </div>
+
+        <div class="chat-body">
+
+          <!-- ALL feed (live messages from Owncast WS + system) -->
+          <div id="chat-feed-all" class="chat-feed" role="tabpanel" aria-label="All chat messages">
+            <div id="chat-messages-all"></div>
+            <p style="color:var(--dim);font-size:10px;padding:8px;letter-spacing:1px;">
+              ⬡ YouTube &amp; Twitch chats visible in their respective tabs
+            </p>
+          </div>
+
+          <!-- Owncast-only feed -->
+          <div id="chat-feed-owncast" class="chat-feed" role="tabpanel" aria-label="Owncast chat messages" style="display:none;">
+            <div id="chat-messages-owncast"></div>
+          </div>
+
+          <!-- YouTube live chat iframe -->
+          <div id="chat-feed-youtube" role="tabpanel" aria-label="YouTube chat" style="display:none;position:absolute;inset:0;">
+            <!--
+              Configure youtubeChatUrl in src/config.js
+              Replace YOUR_VIDEO_ID with the active live video ID
+            -->
+            <iframe
+              src="https://www.youtube.com/live_chat?v=YOUR_VIDEO_ID&embed_domain=willowduster.github.io"
+              title="YouTube Live Chat"
+              style="width:100%;height:100%;border:none;">
+            </iframe>
+          </div>
+
+          <!-- Twitch chat iframe -->
+          <div id="chat-feed-twitch" role="tabpanel" aria-label="Twitch chat" style="display:none;position:absolute;inset:0;">
+            <!--
+              parent must match your deployment domain for Twitch embeds
+            -->
+            <iframe
+              src="https://www.twitch.tv/embed/willowduster/chat?parent=willowduster.github.io&darkpopout"
+              title="Twitch Chat"
+              style="width:100%;height:100%;border:none;">
+            </iframe>
+          </div>
+
+        </div><!-- /.chat-body -->
+
+        <!-- Chat footer: input or login prompt -->
+        <div class="chat-footer">
+          <p class="chat-login-prompt" role="status">
+            <span>[ LOGIN REQUIRED ]</span><br>
+            Sign in above to send messages
+          </p>
+          <!-- Input row (hidden until logged in) -->
+          <div class="chat-input-row" style="display:none;" id="chat-input-row">
+            <input
+              type="text"
+              class="chat-input"
+              id="chat-input"
+              placeholder="type a message..."
+              maxlength="256"
+              aria-label="Chat message input"
+            />
+            <button class="chat-send-btn" id="chat-send">SEND</button>
+          </div>
+        </div>
+
+      </aside><!-- /.chat-column -->
+
+    </main>
+
+    <!-- ── Footer ─────────────────────────────────────────────────────── -->
+    <footer role="contentinfo">
+      <p class="footer-brand">WILLOWDUSTER © 2025</p>
+
+      <nav class="footer-links" aria-label="Social links">
+        <a href="https://twitch.tv/willowduster"   target="_blank" rel="noopener">TWITCH</a>
+        <a href="https://youtube.com/@willowduster" target="_blank" rel="noopener">YOUTUBE</a>
+        <a href="https://instagram.com/willowduster" target="_blank" rel="noopener">INSTAGRAM</a>
+        <a href="https://x.com/willowduster"        target="_blank" rel="noopener">X</a>
+        <a href="https://stream.willowduster.com"   target="_blank" rel="noopener">OWNCAST</a>
+      </nav>
+
+      <div class="status-indicators" aria-label="System status">
+        <span class="status-dot online" role="status">STREAM</span>
+        <span class="status-dot online" role="status">CHAT</span>
+      </div>
+    </footer>
+
+  </div><!-- /#app -->
+
+  <!-- ── Auth Modal ─────────────────────────────────────────────────────── -->
+  <div id="auth-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-hidden="true">
+    <div class="modal-box">
+      <button class="modal-close" id="modal-close" aria-label="Close modal">✕</button>
+      <div id="modal-message"></div>
+    </div>
+  </div>
+
+  <!-- ── Entry Point ────────────────────────────────────────────────────── -->
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
