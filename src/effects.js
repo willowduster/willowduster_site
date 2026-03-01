@@ -25,7 +25,7 @@ export function initMatrixRain() {
     ctx.fillStyle = 'rgba(10,10,15,0.05)'
     ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-    ctx.fillStyle = '#00ff41'
+    ctx.fillStyle = '#00ff2f'
     ctx.font = '14px monospace'
 
     for (let i = 0; i < drops.length; i++) {
@@ -81,7 +81,7 @@ export function initParticles() {
   const container = document.getElementById('particles')
   if (!container) return
 
-  const colors = ['#ff00ff', '#00ffff', '#9d00ff', '#00ff41', '#ff6b35']
+  const colors = ['#00ff2f', '#7fff5e', '#009a1c', '#464646', '#00ff2f']
 
   for (let i = 0; i < PARTICLE_COUNT; i++) {
     const p = document.createElement('div')
@@ -136,4 +136,120 @@ export function initCrtFlicker() {
     }, delay)
   }
   flicker()
+}
+
+// ── Flying Wizards (Flying Toasters homage) ──────────────────────────────────
+// spriteSources: array of entries — either:
+//   string URL (single-frame, e.g. wizard-dance.svg)
+//   { url, frames } (WebP sprite sheet, already resolved)
+export function initFlyingWizards(spriteSources) {
+  const sprites = Array.isArray(spriteSources) ? spriteSources : [spriteSources]
+  const WIZARD_COUNT = 8
+  const SPAWN_INTERVAL = 3000
+  const FG_INTERVAL_MS = 10 * 60 * 1000
+
+  const bgLayer = document.createElement('div')
+  bgLayer.className = 'flying-wizards-bg'
+  bgLayer.setAttribute('aria-hidden', 'true')
+  document.body.appendChild(bgLayer)
+
+  const fgLayer = document.createElement('div')
+  fgLayer.className = 'flying-wizards-fg'
+  fgLayer.setAttribute('aria-hidden', 'true')
+  document.body.appendChild(fgLayer)
+
+  const wizards = []
+  let lastFgTime = 0
+
+  function spawnWizard() {
+    if (wizards.length >= WIZARD_COUNT) return
+
+    const now = Date.now()
+    const isForeground = (now - lastFgTime) >= FG_INTERVAL_MS
+    if (isForeground) lastFgTime = now
+    const layer = isForeground ? fgLayer : bgLayer
+
+    const sprite = sprites[Math.floor(Math.random() * sprites.length)]
+
+    // Random size
+    const size = isForeground
+      ? 80 + Math.random() * 200
+      : 32 + Math.random() * 160
+
+    let el
+    if (typeof sprite === 'string') {
+      // Single-frame image (e.g. wizard-dance.svg)
+      el = document.createElement('img')
+      el.src = sprite
+      el.className = 'flying-wizard'
+      el.style.width = size + 'px'
+      el.style.height = size + 'px'
+    } else {
+      // WebP sprite sheet: { url, frames }
+      el = document.createElement('div')
+      el.className = 'flying-wizard flying-sprite'
+      el.style.width = size + 'px'
+      el.style.height = size + 'px'
+      el.style.backgroundImage = `url(${sprite.url})`
+      el.style.backgroundSize = `${size}px ${size * sprite.frames}px`
+      el.style.setProperty('--sprite-frames', sprite.frames)
+      el.style.setProperty('--sprite-offset', `-${size * sprite.frames}px`)
+    }
+
+    if (isForeground) el.classList.add('flying-wizard--fg')
+
+    // Random starting position
+    const fromRight = Math.random() > 0.4
+    let x, y
+    if (fromRight) {
+      x = window.innerWidth + size
+      y = Math.random() * (window.innerHeight * 0.7)
+    } else {
+      x = Math.random() * window.innerWidth
+      y = -size
+    }
+
+    const vx = -(0.5 + Math.random() * 1.5) * (isForeground ? 1.4 : 1)
+    const vy = (0.3 + Math.random() * 1.0) * (isForeground ? 1.4 : 1)
+
+    let rot = Math.random() * 360
+    const spinSpeed = (Math.random() - 0.5) * 6
+
+    const wobbleAmp = 10 + Math.random() * 30
+    const wobbleFreq = 0.005 + Math.random() * 0.01
+    let wobblePhase = Math.random() * Math.PI * 2
+
+    el.style.opacity = isForeground ? (0.6 + Math.random() * 0.3) : (0.35 + Math.random() * 0.25)
+
+    layer.appendChild(el)
+
+    const wizard = { el, x, y, vx, vy, rot, spinSpeed, wobbleAmp, wobbleFreq, wobblePhase, size }
+    wizards.push(wizard)
+  }
+
+  function update() {
+    for (let i = wizards.length - 1; i >= 0; i--) {
+      const w = wizards[i]
+      w.x += w.vx
+      w.y += w.vy
+      w.rot += w.spinSpeed
+      w.wobblePhase += w.wobbleFreq
+
+      const wobbleX = Math.sin(w.wobblePhase) * w.wobbleAmp
+
+      w.el.style.transform = `translate(${w.x + wobbleX}px, ${w.y}px) rotate(${w.rot}deg)`
+
+      if (w.x < -w.size * 2 || w.y > window.innerHeight + w.size * 2) {
+        w.el.remove()
+        wizards.splice(i, 1)
+      }
+    }
+    requestAnimationFrame(update)
+  }
+
+  for (let i = 0; i < 4; i++) {
+    setTimeout(spawnWizard, i * 600)
+  }
+  setInterval(spawnWizard, SPAWN_INTERVAL)
+  requestAnimationFrame(update)
 }

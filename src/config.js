@@ -1,28 +1,49 @@
 /**
  * WillowDuster Site Configuration
- * Edit these values to point to your actual stream/channel endpoints.
+ *
+ * All credentials and endpoints are loaded from environment variables (.env file).
+ * Vite exposes any variable prefixed with VITE_ via import.meta.env.
+ * Copy .env.example → .env and fill in your values.
  */
+
+const env = import.meta.env
+
 export const CONFIG = {
   // Owncast server URL (base, HLS, and WebSocket)
-  owncastUrl:    'https://stream.willowduster.com',
-  owncastHlsUrl: 'https://stream.willowduster.com/hls/stream.m3u8',
-  owncastWsUrl:  'wss://stream.willowduster.com/ws',
+  owncastUrl:    env.VITE_OWNCAST_URL     || 'https://stream.willowduster.com',
+  owncastHlsUrl: env.VITE_OWNCAST_HLS_URL || 'https://stream.willowduster.com/hls/stream.m3u8',
+  owncastWsUrl:  env.VITE_OWNCAST_WS_URL  || 'wss://stream.willowduster.com/ws',
 
-  // YouTube — replace UCxxxxxxxx with your channel ID and YOUR_VIDEO_ID for live chat
-  youtubeLiveUrl: 'https://www.youtube.com/embed/live_stream?channel=UCxxxxxxxx',
-  youtubeChatUrl: 'https://www.youtube.com/live_chat?v=YOUR_VIDEO_ID',
+  // YouTube
+  youtubeLiveUrl: env.VITE_YOUTUBE_LIVE_URL || '',
+  youtubeChatUrl: env.VITE_YOUTUBE_CHAT_URL || '',
 
-  // Twitch — replace with your Twitch channel name
-  twitchChannel: 'willowduster',
+  // Twitch
+  twitchChannel: env.VITE_TWITCH_CHANNEL || 'willowduster',
+
+  // ── OAuth Client IDs ────────────────────────────────────────────────
+  oauth: {
+    twitch: {
+      clientId: env.VITE_OAUTH_TWITCH_CLIENT_ID || '',
+      scopes:   'user:read:email',
+    },
+    google: {
+      clientId: env.VITE_OAUTH_GOOGLE_CLIENT_ID || '',
+      scopes:   'openid profile email',
+    },
+  },
+
+  // Redirect URI (auto-detected if empty)
+  oauthRedirectUri: env.VITE_OAUTH_REDIRECT_URI || '',
 
   // HLS player tuning
-  hlsBackBufferLength: 30,     // seconds of back-buffer to retain
-  hlsLowLatencyMode:   true,   // enable LL-HLS for minimum delay
+  hlsBackBufferLength: 30,
+  hlsLowLatencyMode:   true,
 
-  // Chat history limit (messages kept per feed before oldest is trimmed)
+  // Chat history limit
   chatMaxMessages: 200,
 
   // Site branding
-  siteTitle:    'WILLOWDUSTER',
+  siteTitle: 'WILLOWDUSTER',
 
 }

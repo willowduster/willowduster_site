@@ -2,20 +2,22 @@
  * chat.js — Owncast WebSocket chat + platform tab switching.
  */
 import { CONFIG } from './config.js'
+import { getUser } from './auth.js'
 
 const MAX_MESSAGES = CONFIG.chatMaxMessages ?? 200
 let ws = null
 let activeTab = 'all'
 
 const PLATFORM_COLORS = {
-  owncast:   '#00ff41',
-  youtube:   '#ff0000',
-  twitch:    '#9d00ff',
-  system:    '#00ffff',
+  owncast:   '#00ff2f',
+  youtube:   '#7fff5e',
+  twitch:    '#009a1c',
+  system:    '#464646',
 }
 
 export function initChat() {
   setupChatTabs()
+  setupChatInput()
   connectOwncastWs()
   appendSystemMessage('SYSTEM ONLINE // Connecting to Owncast chat...')
 }
@@ -131,6 +133,36 @@ function trimMessages(container) {
   while (container.children.length > MAX_MESSAGES) {
     container.removeChild(container.firstChild)
   }
+}
+
+// ── Chat Input ────────────────────────────────────────────────────────────────
+function setupChatInput() {
+  const input   = document.getElementById('chat-input')
+  const sendBtn = document.getElementById('chat-send')
+  if (!input || !sendBtn) return
+
+  const send = () => {
+    const text = input.value.trim()
+    const user = getUser()
+    if (!text || !user) return
+
+    // Send via Owncast WebSocket
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: 'CHAT', body: text }))
+    }
+
+    // Show locally immediately
+    appendChatMessage({
+      platform:  user.platform || 'owncast',
+      user:      user.displayName,
+      text,
+      timestamp: new Date().toISOString(),
+    })
+    input.value = ''
+  }
+
+  sendBtn.addEventListener('click', send)
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') send() })
 }
 
 function escapeHtml(str) {
