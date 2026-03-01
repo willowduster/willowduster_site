@@ -24,5 +24,5 @@ export const CONFIG = {
 
   // Site branding
   siteTitle:    'WILLOWDUSTER',
-  siteSubtitle: 'LIVE DJ SET // CYBERPUNK FREQUENCIES',
+
 }

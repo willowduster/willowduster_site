@@ -189,15 +189,6 @@ header {
   }
 }
 
-#site-subtitle {
-  font-family: var(--font);
-  font-size: clamp(6px, 1vw, 9px);
-  color: var(--pink);
-  letter-spacing: 2px;
-  text-shadow: 0 0 8px var(--pink);
-  visibility: hidden; /* JS reveals via typing effect */
-}
-
 /* Nav */
 nav { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 

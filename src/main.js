@@ -10,16 +10,13 @@ import {
   initMatrixRain,
   initVhsGlitch,
   initParticles,
-  initTypingEffect,
   initCrtFlicker,
 } from './effects.js'
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Inject site title/subtitle from config
-  const titleEl    = document.getElementById('site-title')
-  const subtitleEl = document.getElementById('site-subtitle')
-  if (titleEl)    titleEl.textContent = CONFIG.siteTitle
-  if (subtitleEl) subtitleEl.textContent = ''
+  // Inject site title from config
+  const titleEl = document.getElementById('site-title')
+  if (titleEl) titleEl.textContent = CONFIG.siteTitle
 
   // Background & atmosphere effects
   initMatrixRain()
@@ -34,11 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Auth buttons / modal
   initAuth()
-
-  // Typing effect on subtitle (runs after a short delay for drama)
-  setTimeout(() => {
-    initTypingEffect(subtitleEl, CONFIG.siteSubtitle, 55)
-  }, 800)
 
   // VHS glitch on stream wrapper
   initVhsGlitch()
