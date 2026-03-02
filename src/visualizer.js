@@ -42,7 +42,12 @@ export function initVisualizer(video) {
   // We need user interaction to start AudioContext (browser autoplay policy).
   // Attach to common interaction events on the video and document.
   const startAudio = () => {
-    if (connected) return
+    if (connected) {
+      // AudioContext may have been created during muted autoplay and stayed
+      // suspended.  Resume it now that we have a genuine user gesture.
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume()
+      return
+    }
     try {
       connectAudio(video)
     } catch (e) { console.warn('[visualizer] AudioContext not ready:', e.message) }
@@ -52,8 +57,8 @@ export function initVisualizer(video) {
   video.addEventListener('volumechange', startAudio)
   document.addEventListener('click', startAudio, { once: true })
 
-  // Start the render loop immediately — it will just paint black until
-  // the analyser is connected.
+  // Start the render loop immediately — canvas stays transparent until
+  // the analyser is connected and producing audio data.
   draw()
 }
 
@@ -98,9 +103,8 @@ function draw() {
   const W = canvas.width
   const H = canvas.height
 
-  // Clear to black
-  ctx.fillStyle = '#000'
-  ctx.fillRect(0, 0, W, H)
+  // Clear to transparent so the canvas is invisible when there's no audio
+  ctx.clearRect(0, 0, W, H)
 
   if (!analyser || !dataArray) return
 

@@ -3,7 +3,7 @@
  */
 import './style.css'
 import { CONFIG }          from './config.js'
-import { initStream }      from './stream.js'
+import { initStream, reconnectStream, disconnectStream } from './stream.js'
 import { initVhsGlitch, initFlyingWizards } from './effects.js'
 import { initVisualizer, getAudioLevels }  from './visualizer.js'
 
@@ -167,6 +167,8 @@ document.addEventListener('DOMContentLoaded', () => {
 })
 
 // ── Stream Status ─────────────────────────────────────────────────────────────
+let lastOnline = null // track state transitions so we only reconnect/disconnect once
+
 async function pollStreamStatus() {
   const countEl = document.getElementById('viewer-count')
   const badge   = document.getElementById('live-badge')
@@ -182,19 +184,22 @@ async function pollStreamStatus() {
       countEl.title = `${count} viewer${count !== 1 ? 's' : ''}`
     }
 
-    // Live / Offline badge
+    // Live / Offline badge + player state
     if (badge) {
       if (data.online) {
         badge.textContent = '● LIVE'
         badge.setAttribute('aria-label', 'Stream status: live')
         badge.classList.remove('live-badge--offline')
         badge.classList.add('live-badge--live')
+        if (lastOnline === false) reconnectStream()
       } else {
         badge.textContent = '● OFFLINE'
         badge.setAttribute('aria-label', 'Stream status: offline')
         badge.classList.remove('live-badge--live')
         badge.classList.add('live-badge--offline')
+        if (lastOnline === true) disconnectStream()
       }
+      lastOnline = data.online
     }
   } catch (_) {
     // Network error — leave UI as-is
