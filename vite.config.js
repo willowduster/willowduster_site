@@ -12,7 +12,17 @@ export default defineConfig({
         manualChunks: {
           'hls': ['hls.js'],
         },
+        // Content-hashed filenames for long-term caching
+        assetFileNames: 'assets/[name]-[hash][extname]',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
       },
     },
+    // Minification via default esbuild
+    minify: 'esbuild',
+    // Enable CSS code splitting
+    cssCodeSplit: true,
+    // Inline small assets as base64
+    assetsInlineLimit: 4096,
   },
 })

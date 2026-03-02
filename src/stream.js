@@ -25,6 +25,7 @@ function initHlsPlayer() {
     hlsInstance.attachMedia(video)
 
     hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+      showLiveBadge()
       video.play().catch(() => {
         // Autoplay blocked — user must click play manually; that's fine
       })
@@ -59,5 +60,23 @@ function showOfflineBanner() {
   if (banner) banner.style.display = 'flex'
   const video = document.getElementById('owncast-video')
   if (video)  video.style.display  = 'none'
+  // Update LIVE badge to offline
+  const badge = document.getElementById('live-badge')
+  if (badge) {
+    badge.textContent = '● OFFLINE'
+    badge.setAttribute('aria-label', 'Stream status: offline')
+    badge.classList.remove('live-badge--live')
+    badge.classList.add('live-badge--offline')
+  }
+}
+
+function showLiveBadge() {
+  const badge = document.getElementById('live-badge')
+  if (badge) {
+    badge.textContent = '● LIVE'
+    badge.setAttribute('aria-label', 'Stream status: live')
+    badge.classList.remove('live-badge--offline')
+    badge.classList.add('live-badge--live')
+  }
 }
 

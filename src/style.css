@@ -149,18 +149,24 @@ header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 24px;
-  background: rgba(10,10,15,0.92);
-  border-bottom: 2px solid var(--magic);
-  box-shadow: 0 0 20px rgba(0,255,47,0.3), 0 2px 0 var(--magic);
-  flex-wrap: wrap;
+  padding: 8px 20px;
+  background: rgba(6,10,6,0.85);
+  border-bottom: 1px solid var(--deep);
+  box-shadow: 0 1px 8px rgba(0,255,47,0.15);
   gap: 12px;
   position: sticky;
   top: 0;
   z-index: 100;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
-.header-left { display: flex; align-items: center; gap: 12px; }
+.header-left { display: flex; align-items: center; gap: 10px; }
+
+.header-logo {
+  width: 28px;
+  height: 28px;
+}
 
 .site-logo {
   width: 40px;
@@ -201,13 +207,12 @@ header {
 /* ── Glitch Title ────────────────────────────────────────────────────── */
 #site-title {
   font-family: var(--font);
-  font-size: clamp(14px, 2.5vw, 26px);
+  font-size: clamp(10px, 2vw, 16px);
   color: var(--magic);
-  letter-spacing: 4px;
+  letter-spacing: 3px;
   text-shadow:
-    0 0 10px var(--magic),
-    0 0 20px var(--magic),
-    0 0 40px var(--magic);
+    0 0 8px var(--magic),
+    0 0 16px var(--magic);
   animation: glitchTitle 4s infinite;
   position: relative;
 }
@@ -411,16 +416,18 @@ main {
   flex: 1;
   min-height: 0;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
 }
 
 /* ── Stream Column ───────────────────────────────────────────────────── */
 .stream-column {
-  flex: 0 1 900px;
+  flex: 0 1 auto;
+  width: 100%;
+  max-width: calc(85vh * 16 / 9);
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
 /* Stream tabs */
@@ -456,7 +463,8 @@ main {
 .player-wrapper {
   position: relative;
   width: 100%;
-  aspect-ratio: 16/9;
+  height: 85vh;
+  max-height: 85vh;
   background: #000;
   border: 2px solid var(--magic);
   box-shadow: 0 0 20px rgba(0,255,47,0.2), inset 0 0 20px rgba(0,0,0,0.5);
@@ -540,15 +548,25 @@ main {
   font-family: var(--font);
   font-size: 7px;
   padding: 4px 8px;
-  background: var(--magic);
-  color: #000;
   letter-spacing: 2px;
-  animation: liveBlink 1.5s step-end infinite;
 }
 
-@keyframes liveBlink {
-  0%,100% { opacity: 1; }
-  50%      { opacity: 0.4; }
+/* Offline state — solid red */
+.live-badge--offline {
+  background: #cc0000;
+  color: #fff;
+}
+
+/* Live state — green with slow pulse at ~140bpm (60/140 ≈ 0.43s cycle) */
+.live-badge--live {
+  background: var(--magic);
+  color: #000;
+  animation: livePulse 0.43s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 0.85; }
+  50%      { opacity: 1; }
 }
 
 .stream-url { color: var(--dim); font-size: 10px; word-break: break-all; }
@@ -798,12 +816,14 @@ main {
 /* ── Footer ──────────────────────────────────────────────────────────── */
 footer {
   padding: 6px 16px;
-  background: transparent;
-  border-top: none;
+  background: rgba(6,10,6,0.85);
+  border-top: 1px solid var(--deep);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .footer-wizard {
@@ -969,6 +989,15 @@ footer {
   50%      { transform: translateY(-10px) rotate(2deg); }
 }
 
+/* ── Fullscreen video ─────────────────────────────────────────────────── */
+:fullscreen .player-wrapper {
+  height: 100vh;
+  max-height: 100vh;
+  border: none;
+  box-shadow: none;
+  animation: none;
+}
+
 /* ── Responsive ──────────────────────────────────────────────────────── */
 @media (max-width: 900px) {
   main {
@@ -979,6 +1008,12 @@ footer {
   .stream-column {
     flex: none;
     width: 100%;
+    max-width: none;
+  }
+
+  .player-wrapper {
+    height: 60vh;
+    max-height: 60vh;
   }
 
   .chat-column {
@@ -987,13 +1022,20 @@ footer {
 }
 
 @media (max-width: 600px) {
-  header { padding: 10px 12px; }
-  #site-title { font-size: 14px; letter-spacing: 2px; }
+  header { padding: 6px 10px; }
+  #site-title { font-size: 11px; letter-spacing: 2px; }
+
+  .header-tagline { display: none; }
 
   .social-login-btn { font-size: 6px; padding: 6px 7px; }
 
   .stream-tabs { overflow-x: auto; padding-bottom: 4px; }
   .stream-tab-btn { white-space: nowrap; }
+
+  .player-wrapper {
+    height: 50vh;
+    max-height: 50vh;
+  }
 
   footer { flex-direction: column; align-items: flex-start; }
 }
