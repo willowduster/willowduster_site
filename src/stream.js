@@ -1,5 +1,9 @@
 /**
  * stream.js — HLS.js Owncast player.
+ *
+ * Two states: online or offline.
+ *   setStreamOnline()  — idempotent, starts HLS if not already running.
+ *   setStreamOffline() — idempotent, tears down HLS if running.
  */
 import Hls from 'hls.js'
 import { CONFIG } from './config.js'
@@ -13,10 +17,22 @@ export function initStream() {
 }
 
 /**
- * Tear down current HLS player, show the offline banner, hide video.
- * Called by pollStreamStatus when the API reports offline.
+ * Ensure the player is running. No-op if HLS is already active.
  */
-export function disconnectStream() {
+export function setStreamOnline() {
+  if (hlsInstance) return
+  hlsNetworkRetries = 0
+  const banner = document.getElementById('stream-offline')
+  if (banner) banner.style.display = 'none'
+  const video = document.getElementById('owncast-video')
+  if (video) video.style.display = ''
+  initHlsPlayer()
+}
+
+/**
+ * Ensure the player is stopped and the offline banner is visible.
+ */
+export function setStreamOffline() {
   if (hlsInstance) {
     hlsInstance.destroy()
     hlsInstance = null
@@ -25,33 +41,6 @@ export function disconnectStream() {
   if (banner) banner.style.display = 'flex'
   const video = document.getElementById('owncast-video')
   if (video) video.style.display = 'none'
-}
-
-/**
- * Returns true when the HLS player has been torn down (e.g. after
- * network retries exhausted). Used by the poller so it can retry
- * even when lastOnline was already true.
- */
-export function isStreamDisconnected() {
-  return hlsInstance === null
-}
-
-/**
- * Tear down old HLS, hide offline banner, show video, re-init player.
- * Called by pollStreamStatus when the API reports online but the
- * player is currently showing the offline state.
- */
-export function reconnectStream() {
-  if (hlsInstance) {
-    hlsInstance.destroy()
-    hlsInstance = null
-  }
-  hlsNetworkRetries = 0
-  const banner = document.getElementById('stream-offline')
-  if (banner) banner.style.display = 'none'
-  const video = document.getElementById('owncast-video')
-  if (video) video.style.display = ''
-  initHlsPlayer()
 }
 
 // ── HLS Player ────────────────────────────────────────────────────────────────
@@ -70,12 +59,10 @@ function initHlsPlayer() {
 
     hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
       hlsNetworkRetries = 0
-      // Ensure video is visible and offline banner is hidden even if
-      // reconnectStream() was not the caller (e.g. initial load probe).
+      // Ensure video is visible and offline banner is hidden
       const banner = document.getElementById('stream-offline')
       if (banner) banner.style.display = 'none'
       video.style.display = ''
-      showLiveBadge()
       // Muted autoplay is reliable in all browsers; after play starts,
       // attempt to unmute so the user hears audio immediately.
       video.muted = true
@@ -137,13 +124,4 @@ function showOfflineBanner() {
   if (video)  video.style.display  = 'none'
 }
 
-function showLiveBadge() {
-  const badge = document.getElementById('live-badge')
-  if (badge) {
-    badge.textContent = '● LIVE'
-    badge.setAttribute('aria-label', 'Stream status: live')
-    badge.classList.remove('live-badge--offline')
-    badge.classList.add('live-badge--live')
-  }
-}
 
