@@ -5,6 +5,7 @@ import './style.css'
 import { CONFIG }          from './config.js'
 import { initStream }      from './stream.js'
 import { initVhsGlitch, initFlyingWizards } from './effects.js'
+import { initVisualizer }  from './visualizer.js'
 
 // Asset imports — Vite resolves these to correct URLs automatically
 import wizardDance from './assets/wizard-dance.gif'
@@ -149,6 +150,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Stream player
   initStream()
+
+  // Audio frequency visualizer
+  const video = document.getElementById('owncast-video')
+  if (video) initVisualizer(video)
 
   // VHS glitch on stream wrapper
   initVhsGlitch()
