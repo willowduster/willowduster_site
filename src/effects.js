@@ -144,9 +144,9 @@ export function initCrtFlicker() {
 //   { url, frames } (WebP sprite sheet, already resolved)
 export function initFlyingWizards(spriteSources) {
   const sprites = Array.isArray(spriteSources) ? spriteSources : [spriteSources]
-  const WIZARD_COUNT = 8
-  const SPAWN_INTERVAL = 3000
-  const FG_INTERVAL_MS = 10 * 60 * 1000
+  const WIZARD_COUNT = 16
+  const SPAWN_INTERVAL = 1500
+  const FG_INTERVAL_MS = 15 * 1000
 
   const bgLayer = document.createElement('div')
   bgLayer.className = 'flying-wizards-bg'
@@ -173,8 +173,8 @@ export function initFlyingWizards(spriteSources) {
 
     // Random size
     const size = isForeground
-      ? 80 + Math.random() * 200
-      : 32 + Math.random() * 160
+      ? 200 + Math.random() * 500
+      : 60 + Math.random() * 300
 
     let el
     if (typeof sprite === 'string') {
@@ -213,7 +213,7 @@ export function initFlyingWizards(spriteSources) {
     const vy = (0.3 + Math.random() * 1.0) * (isForeground ? 1.4 : 1)
 
     let rot = Math.random() * 360
-    const spinSpeed = (Math.random() - 0.5) * 6
+    const spinSpeed = (Math.random() - 0.5) * 1.5
 
     const wobbleAmp = 10 + Math.random() * 30
     const wobbleFreq = 0.005 + Math.random() * 0.01
