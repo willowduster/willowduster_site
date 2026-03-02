@@ -1,14 +1,12 @@
 /**
- * stream.js — HLS.js Owncast player + YouTube/Twitch stream tab switching.
+ * stream.js — HLS.js Owncast player.
  */
 import Hls from 'hls.js'
 import { CONFIG } from './config.js'
 
 let hlsInstance = null
-let activeStream = 'owncast'
 
 export function initStream() {
-  setupStreamTabs()
   initHlsPlayer()
 }
 
@@ -63,25 +61,3 @@ function showOfflineBanner() {
   if (video)  video.style.display  = 'none'
 }
 
-// ── Stream Tab Switching ──────────────────────────────────────────────────────
-function setupStreamTabs() {
-  const tabs = document.querySelectorAll('.stream-tab-btn')
-  tabs.forEach(btn => {
-    btn.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'))
-      btn.classList.add('active')
-      activeStream = btn.dataset.stream
-      updateStreamPanels()
-    })
-  })
-}
-
-function updateStreamPanels() {
-  const owncastPanel = document.getElementById('panel-owncast')
-  const youtubePanel = document.getElementById('panel-youtube')
-  const twitchPanel  = document.getElementById('panel-twitch')
-
-  if (owncastPanel) owncastPanel.style.display = activeStream === 'owncast'  ? 'block' : 'none'
-  if (youtubePanel) youtubePanel.style.display = activeStream === 'youtube'  ? 'block' : 'none'
-  if (twitchPanel)  twitchPanel.style.display  = activeStream === 'twitch'   ? 'block' : 'none'
-}
