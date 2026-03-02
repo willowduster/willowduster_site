@@ -70,6 +70,11 @@ function initHlsPlayer() {
 
     hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
       hlsNetworkRetries = 0
+      // Ensure video is visible and offline banner is hidden even if
+      // reconnectStream() was not the caller (e.g. initial load probe).
+      const banner = document.getElementById('stream-offline')
+      if (banner) banner.style.display = 'none'
+      video.style.display = ''
       showLiveBadge()
       video.play().catch(() => {
         // Autoplay blocked — user must click play manually; that's fine
@@ -94,6 +99,7 @@ function initHlsPlayer() {
             break
           default:
             hlsInstance.destroy()
+            hlsInstance = null
             showOfflineBanner()
         }
       }
