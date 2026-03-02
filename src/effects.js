@@ -45,6 +45,10 @@ export function initMatrixRain() {
 // ── VHS Tracking Glitch ───────────────────────────────────────────────────────
 let _vhsAudioFn = null
 
+// Audio-reactive thresholds for VHS glitch
+const HIGH_FREQ_THRESHOLD = 120
+const TRANSIENT_DELTA = 40
+
 export function initVhsGlitch(audioLevelsFn) {
   const playerWrap = document.querySelector('.player-wrapper')
   if (!playerWrap) return
@@ -85,7 +89,7 @@ export function initVhsGlitch(audioLevelsFn) {
       // More energy → shorter delay (minimum ~1s)
       delay = Math.max(1000, delay * (1 - highNorm * 0.6))
       // Extra burst on transient
-      if (levels.high > 120 && levels.high - prevHigh > 40) {
+      if (levels.high > HIGH_FREQ_THRESHOLD && levels.high - prevHigh > TRANSIENT_DELTA) {
         setTimeout(glitch, 40)
       }
       prevHigh = levels.high
@@ -169,6 +173,10 @@ export function initCrtFlicker() {
 //   string URL (single-frame, e.g. wizard-dance.svg)
 //   { url, frames } (WebP sprite sheet, already resolved)
 let _wizAudioFn = null
+
+// Audio-reactive tuning for flying wizards
+const BASS_SPEED_SCALE = 1.5
+const WOBBLE_SCALE = 2
 
 export function initFlyingWizards(spriteSources, audioLevelsFn) {
   const sprites = Array.isArray(spriteSources) ? spriteSources : [spriteSources]
@@ -259,8 +267,8 @@ export function initFlyingWizards(spriteSources, audioLevelsFn) {
   function update() {
     const levels = _wizAudioFn ? _wizAudioFn() : null
     // Audio multipliers: bass drives speed, overall drives wobble
-    const speedMul = levels ? (1 + (levels.bass / 255) * 1.5) : 1
-    const wobbleMul = levels ? (1 + (levels.overall / 255) * 2) : 1
+    const speedMul = levels ? (1 + (levels.bass / 255) * BASS_SPEED_SCALE) : 1
+    const wobbleMul = levels ? (1 + (levels.overall / 255) * WOBBLE_SCALE) : 1
     const glowIntensity = levels ? Math.min(levels.bass / 200, 1) : 0
 
     for (let i = wizards.length - 1; i >= 0; i--) {
