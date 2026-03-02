@@ -7,6 +7,7 @@ import { getUser } from './auth.js'
 const MAX_MESSAGES = CONFIG.chatMaxMessages ?? 200
 let ws = null
 let activeTab = 'all'
+let owncastAccessToken = null
 
 const PLATFORM_COLORS = {
   owncast:   '#00ff2f',
@@ -22,10 +23,25 @@ export function initChat() {
   appendSystemMessage('SYSTEM ONLINE // Connecting to Owncast chat...')
 }
 
+// ── Owncast Chat Registration ─────────────────────────────────────────────────
+async function registerOwncastChat() {
+  const registerUrl = CONFIG.owncastUrl.replace(/\/+$/, '') + '/api/chat/register'
+  const res = await fetch(registerUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+  if (!res.ok) throw new Error(`Register failed: ${res.status} ${res.statusText}`)
+  const data = await res.json()
+  return data.accessToken
+}
+
 // ── WebSocket ─────────────────────────────────────────────────────────────────
-function connectOwncastWs() {
+async function connectOwncastWs() {
   try {
-    ws = new WebSocket(CONFIG.owncastWsUrl)
+    if (!owncastAccessToken) {
+      owncastAccessToken = await registerOwncastChat()
+    }
+
+    const sep = CONFIG.owncastWsUrl.includes('?') ? '&' : '?'
+    const wsUrl = CONFIG.owncastWsUrl + sep + 'accessToken=' + encodeURIComponent(owncastAccessToken)
+    ws = new WebSocket(wsUrl)
 
     ws.addEventListener('open', () => {
       appendSystemMessage(`CONNECTED // ${CONFIG.owncastWsUrl}`)
@@ -49,6 +65,7 @@ function connectOwncastWs() {
     })
 
     ws.addEventListener('close', () => {
+      owncastAccessToken = null
       appendSystemMessage('CONNECTION LOST // Retrying in 10s...')
       setTimeout(connectOwncastWs, 10000)
     })
@@ -58,6 +75,7 @@ function connectOwncastWs() {
     })
   } catch (err) {
     appendSystemMessage(`WS INIT ERROR // ${err.message}`)
+    setTimeout(connectOwncastWs, 10000)
   }
 }
 
