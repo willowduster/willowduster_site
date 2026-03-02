@@ -3,7 +3,7 @@
  */
 import './style.css'
 import { CONFIG }          from './config.js'
-import { reconnectStream, disconnectStream, isStreamDisconnected } from './stream.js'
+import { initStream, reconnectStream, disconnectStream, isStreamDisconnected } from './stream.js'
 import { initVhsGlitch, initFlyingWizards } from './effects.js'
 import { initVisualizer, getAudioLevels }  from './visualizer.js'
 
@@ -130,6 +130,10 @@ document.addEventListener('DOMContentLoaded', () => {
         app.classList.add('screensaver-active')
         ssOverlay.classList.add('active')
         ssBtn.textContent = '✕ EXIT SS'
+        // Enter fullscreen when screensaver activates
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {})
+        }
       } else {
         exitScreensaver()
       }
@@ -146,6 +150,10 @@ document.addEventListener('DOMContentLoaded', () => {
     app.classList.remove('screensaver-active')
     ssOverlay.classList.remove('active')
     ssBtn.textContent = '◈ SCREENSAVER'
+    // Exit fullscreen when screensaver deactivates
+    if (document.fullscreenElement) {
+      document.exitFullscreen()
+    }
   }
 
   // Show offline state initially — first status poll will correct it
@@ -153,6 +161,11 @@ document.addEventListener('DOMContentLoaded', () => {
   if (offlineBanner) offlineBanner.style.display = 'flex'
   const videoEl = document.getElementById('owncast-video')
   if (videoEl) videoEl.style.display = 'none'
+
+  // Attempt to connect HLS immediately — if the stream is already live the
+  // MANIFEST_PARSED handler will flip the UI to live without waiting for the
+  // API poll (which may fail due to CORS / network issues).
+  initStream()
 
   // Audio frequency visualizer
   const video = document.getElementById('owncast-video')
