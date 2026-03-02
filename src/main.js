@@ -197,7 +197,7 @@ async function pollStreamStatus() {
         badge.setAttribute('aria-label', 'Stream status: offline')
         badge.classList.remove('live-badge--live')
         badge.classList.add('live-badge--offline')
-        if (lastOnline === true) disconnectStream()
+        if (lastOnline !== false) disconnectStream()
       }
       lastOnline = data.online
     }
