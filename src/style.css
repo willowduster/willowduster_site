@@ -168,13 +168,6 @@ header {
   height: 28px;
 }
 
-.header-tagline {
-  font-family: var(--font);
-  font-size: 7px;
-  color: var(--dim);
-  letter-spacing: 2px;
-}
-
 .site-logo {
   width: 40px;
   height: 40px;
@@ -1030,7 +1023,7 @@ footer {
 
 @media (max-width: 600px) {
   header { padding: 6px 10px; }
-  #site-title { font-size: 9px; letter-spacing: 2px; }
+  #site-title { font-size: 11px; letter-spacing: 2px; }
 
   .header-tagline { display: none; }
 

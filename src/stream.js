@@ -64,6 +64,7 @@ function showOfflineBanner() {
   const badge = document.getElementById('live-badge')
   if (badge) {
     badge.textContent = '● OFFLINE'
+    badge.setAttribute('aria-label', 'Stream status: offline')
     badge.classList.remove('live-badge--live')
     badge.classList.add('live-badge--offline')
   }
@@ -73,6 +74,7 @@ function showLiveBadge() {
   const badge = document.getElementById('live-badge')
   if (badge) {
     badge.textContent = '● LIVE'
+    badge.setAttribute('aria-label', 'Stream status: live')
     badge.classList.remove('live-badge--offline')
     badge.classList.add('live-badge--live')
   }
