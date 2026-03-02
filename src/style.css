@@ -833,14 +833,6 @@ footer {
   -webkit-backdrop-filter: blur(8px);
 }
 
-.footer-wizard {
-  width: 28px;
-  height: 28px;
-  image-rendering: pixelated;
-  filter: drop-shadow(0 0 3px rgba(0,255,47,0.25));
-  opacity: 0.5;
-}
-
 .footer-brand {
   font-family: var(--font);
   font-size: 8px;
@@ -999,6 +991,35 @@ footer {
 /* ── Hide native video fullscreen button ──────────────────────────────── */
 #owncast-video::-webkit-media-controls-fullscreen-button { display: none !important; }
 #owncast-video::-webkit-media-controls-picture-in-picture-button { display: none !important; }
+
+/* ── Exit Fullscreen Button ────────────────────────────────────────────── */
+.exit-fullscreen-btn {
+  display: none;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 20;
+  font-family: var(--font);
+  font-size: 8px;
+  padding: 8px 14px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid var(--magic);
+  color: var(--magic);
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.2s;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.exit-fullscreen-btn:hover {
+  background: rgba(0, 255, 47, 0.15);
+  box-shadow: 0 0 10px var(--magic);
+}
+
+:fullscreen .exit-fullscreen-btn {
+  display: block;
+}
 
 /* ── Fullscreen video ─────────────────────────────────────────────────── */
 :fullscreen .player-wrapper {
