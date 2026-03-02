@@ -44,6 +44,6 @@ export const CONFIG = {
   chatMaxMessages: 200,
 
   // Site branding
-  siteTitle: 'WILLOWDUSTER',
+  siteTitle: 'willowduster - live stream',
 
 }

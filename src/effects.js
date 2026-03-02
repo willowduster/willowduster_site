@@ -145,7 +145,7 @@ export function initCrtFlicker() {
 export function initFlyingWizards(spriteSources) {
   const sprites = Array.isArray(spriteSources) ? spriteSources : [spriteSources]
   const WIZARD_COUNT = 16
-  const SPAWN_INTERVAL = 1500
+  const SPAWN_INTERVAL = 3000
   const FG_INTERVAL_MS = 15 * 1000
 
   const bgLayer = document.createElement('div')
@@ -209,8 +209,8 @@ export function initFlyingWizards(spriteSources) {
       y = -size
     }
 
-    const vx = -(0.5 + Math.random() * 1.5) * (isForeground ? 1.4 : 1)
-    const vy = (0.3 + Math.random() * 1.0) * (isForeground ? 1.4 : 1)
+    const vx = -(0.2 + Math.random() * 0.6) * (isForeground ? 1.2 : 1)
+    const vy = (0.15 + Math.random() * 0.4) * (isForeground ? 1.2 : 1)
 
     let rot = Math.random() * 360
     const spinSpeed = (Math.random() - 0.5) * 1.5
