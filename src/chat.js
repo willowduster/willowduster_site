@@ -8,6 +8,7 @@ const MAX_MESSAGES = CONFIG.chatMaxMessages ?? 200
 let ws = null
 let activeTab = 'all'
 let owncastAccessToken = null
+let wsInitFailed = false
 
 const PLATFORM_COLORS = {
   owncast:   '#00ff2f',
@@ -44,6 +45,7 @@ async function connectOwncastWs() {
     ws = new WebSocket(wsUrl)
 
     ws.addEventListener('open', () => {
+      wsInitFailed = false
       appendSystemMessage(`CONNECTED // ${CONFIG.owncastWsUrl}`)
     })
 
@@ -74,7 +76,10 @@ async function connectOwncastWs() {
       appendSystemMessage('WS ERROR // Check owncastWsUrl in config.js')
     })
   } catch (err) {
-    appendSystemMessage(`WS INIT ERROR // ${err.message}`)
+    if (!wsInitFailed) {
+      appendSystemMessage('OWNCAST OFFLINE // Retrying in background…')
+      wsInitFailed = true
+    }
     setTimeout(connectOwncastWs, 10000)
   }
 }
