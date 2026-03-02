@@ -178,16 +178,16 @@ header {
 .site-logo .o {
   fill: #000;
   filter: drop-shadow(0 0 0.5px rgba(0, 255, 47, 0.3));
-  animation: outlineGlow 4s ease-in-out infinite;
+  animation: outlineGlow 16s ease-in-out infinite;
 }
 .site-logo .b {
   fill: #464646;
-  animation: bodyPulse 5s ease-in-out infinite;
+  animation: bodyPulse 20s ease-in-out infinite;
 }
 .site-logo .m {
   fill: #00ff2f;
   filter: drop-shadow(0 0 2px #00ff2f);
-  animation: magicGlow 2.5s ease-in-out infinite;
+  animation: magicGlow 10s ease-in-out infinite;
 }
 
 @keyframes outlineGlow {
@@ -468,7 +468,7 @@ main {
   background: #000;
   border: 2px solid var(--magic);
   box-shadow: 0 0 20px rgba(0,255,47,0.2), inset 0 0 20px rgba(0,0,0,0.5);
-  animation: neonPulse 3s ease-in-out infinite;
+  animation: neonPulse 12s ease-in-out infinite;
   overflow: hidden;
 }
 
@@ -557,11 +557,11 @@ main {
   color: #fff;
 }
 
-/* Live state — green with slow pulse at ~140bpm (60/140 ≈ 0.43s cycle) */
+/* Live state — green with slow pulse */
 .live-badge--live {
   background: var(--magic);
   color: #000;
-  animation: livePulse 0.43s ease-in-out infinite;
+  animation: livePulse 1.72s ease-in-out infinite;
 }
 
 @keyframes livePulse {
@@ -570,6 +570,13 @@ main {
 }
 
 .stream-url { color: var(--dim); font-size: 10px; word-break: break-all; }
+
+.viewer-count {
+  font-family: var(--font);
+  font-size: 8px;
+  color: var(--dim);
+  letter-spacing: 1px;
+}
 
 /* ── Chat Column (right, 40%) ────────────────────────────────────────── */
 .chat-column {
@@ -939,7 +946,7 @@ footer {
 }
 
 .status-dot.online { color: var(--green); }
-.status-dot.online::before { background: var(--green); box-shadow: 0 0 6px var(--green); animation: statusPulse 2s infinite; }
+.status-dot.online::before { background: var(--green); box-shadow: 0 0 6px var(--green); animation: statusPulse 8s infinite; }
 
 @keyframes statusPulse {
   0%,100% { box-shadow: 0 0 4px var(--green); }

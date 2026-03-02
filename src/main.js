@@ -5,7 +5,7 @@ import './style.css'
 import { CONFIG }          from './config.js'
 import { initStream }      from './stream.js'
 import { initVhsGlitch, initFlyingWizards } from './effects.js'
-import { initVisualizer }  from './visualizer.js'
+import { initVisualizer, getAudioLevels }  from './visualizer.js'
 
 // Asset imports — Vite resolves these to correct URLs automatically
 import wizardDance from './assets/wizard-dance.gif'
@@ -155,9 +155,48 @@ document.addEventListener('DOMContentLoaded', () => {
   const video = document.getElementById('owncast-video')
   if (video) initVisualizer(video)
 
-  // VHS glitch on stream wrapper
-  initVhsGlitch()
+  // VHS glitch on stream wrapper (audio-reactive)
+  initVhsGlitch(getAudioLevels)
 
-  // Flying wizard screensaver — full sprite pool
-  initFlyingWizards(SPRITE_POOL)
+  // Flying wizard screensaver — full sprite pool (audio-reactive)
+  initFlyingWizards(SPRITE_POOL, getAudioLevels)
+
+  // ── Stream Status Polling (live badge + viewer count) ───────────
+  pollStreamStatus()
+  setInterval(pollStreamStatus, 10000)
 })
+
+// ── Stream Status ─────────────────────────────────────────────────────────────
+async function pollStreamStatus() {
+  const countEl = document.getElementById('viewer-count')
+  const badge   = document.getElementById('live-badge')
+  try {
+    const res = await fetch(CONFIG.owncastUrl.replace(/\/+$/, '') + '/api/status')
+    if (!res.ok) return
+    const data = await res.json()
+
+    // Viewer count
+    if (countEl) {
+      const count = data.viewerCount ?? 0
+      countEl.textContent = `👁 ${count}`
+      countEl.title = `${count} viewer${count !== 1 ? 's' : ''}`
+    }
+
+    // Live / Offline badge
+    if (badge) {
+      if (data.online) {
+        badge.textContent = '● LIVE'
+        badge.setAttribute('aria-label', 'Stream status: live')
+        badge.classList.remove('live-badge--offline')
+        badge.classList.add('live-badge--live')
+      } else {
+        badge.textContent = '● OFFLINE'
+        badge.setAttribute('aria-label', 'Stream status: offline')
+        badge.classList.remove('live-badge--live')
+        badge.classList.add('live-badge--offline')
+      }
+    }
+  } catch (_) {
+    // Network error — leave UI as-is
+  }
+}

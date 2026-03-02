@@ -12,7 +12,7 @@ export default defineConfig({
         manualChunks: {
           'hls': ['hls.js'],
         },
-        // Content-hashed filenames for long-term caching
+        // Filename hashing ensures updated assets get fresh URLs
         assetFileNames: 'assets/[name]-[hash][extname]',
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',
