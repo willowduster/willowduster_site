@@ -27,7 +27,11 @@ export function initChat() {
 // ── Owncast Chat Registration ─────────────────────────────────────────────────
 async function registerOwncastChat() {
   const registerUrl = CONFIG.owncastUrl.replace(/\/+$/, '') + '/api/chat/register'
-  const res = await fetch(registerUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+  const res = await fetch(registerUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({}),
+  })
   if (!res.ok) throw new Error(`Register failed: ${res.status} ${res.statusText}`)
   const data = await res.json()
   return data.accessToken
@@ -50,19 +54,29 @@ async function connectOwncastWs() {
     })
 
     ws.addEventListener('message', event => {
-      try {
-        const data = JSON.parse(event.data)
-        // Owncast sends type: "CHAT" messages
-        if (data.type === 'CHAT') {
-          appendChatMessage({
-            platform:  'owncast',
-            user:      data.user?.displayName || 'anon',
-            text:      data.body || '',
-            timestamp: data.timestamp || new Date().toISOString(),
-          })
+      // Owncast sends multiple events per frame separated by newlines
+      const messages = event.data.split('\n')
+      for (const raw of messages) {
+        if (!raw) continue
+        try {
+          const data = JSON.parse(raw)
+          // Respond to server PING to keep connection alive
+          if (data.type === 'PING') {
+            ws.send(JSON.stringify({ type: 'PONG' }))
+            continue
+          }
+          // Owncast sends type: "CHAT" messages
+          if (data.type === 'CHAT') {
+            appendChatMessage({
+              platform:  'owncast',
+              user:      data.user?.displayName || 'anon',
+              text:      data.body || '',
+              timestamp: data.timestamp || new Date().toISOString(),
+            })
+          }
+        } catch (_) {
+          // Non-JSON frames are ignored
         }
-      } catch (_) {
-        // Non-JSON frames are ignored
       }
     })
 
