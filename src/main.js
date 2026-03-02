@@ -4,8 +4,6 @@
 import './style.css'
 import { CONFIG }          from './config.js'
 import { initStream }      from './stream.js'
-import { initChat }        from './chat.js'
-import { initAuth }        from './auth.js'
 import { initVhsGlitch, initFlyingWizards } from './effects.js'
 
 // Asset imports — Vite resolves these to correct URLs automatically
@@ -29,10 +27,6 @@ function randomSprite() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Inject site title from config
-  const titleEl = document.getElementById('site-title')
-  if (titleEl) titleEl.textContent = CONFIG.siteTitle
-
   // Set image sources from Vite-resolved asset imports
   const loadingWizard = document.getElementById('loading-wizard')
   if (loadingWizard) loadingWizard.src = wizardDanceSvg
@@ -155,12 +149,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Stream player
   initStream()
-
-  // Chat system
-  initChat()
-
-  // Auth buttons / modal
-  initAuth()
 
   // VHS glitch on stream wrapper
   initVhsGlitch()

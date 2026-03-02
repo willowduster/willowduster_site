@@ -410,11 +410,13 @@ main {
   padding: 16px;
   flex: 1;
   min-height: 0;
+  justify-content: center;
+  align-items: flex-start;
 }
 
-/* ── Stream Column (left, 60%) ───────────────────────────────────────── */
+/* ── Stream Column ───────────────────────────────────────────────────── */
 .stream-column {
-  flex: 0 0 60%;
+  flex: 0 1 900px;
   min-width: 0;
   display: flex;
   flex-direction: column;
