@@ -3,7 +3,7 @@
  */
 import './style.css'
 import { CONFIG }          from './config.js'
-import { initStream, reconnectStream, disconnectStream } from './stream.js'
+import { initStream, reconnectStream, disconnectStream, isStreamDisconnected } from './stream.js'
 import { initVhsGlitch, initFlyingWizards } from './effects.js'
 import { initVisualizer, getAudioLevels }  from './visualizer.js'
 
@@ -190,11 +190,17 @@ async function pollStreamStatus() {
     // Live / Offline badge + player state
     if (badge) {
       if (data.online) {
-        badge.textContent = '● LIVE'
-        badge.setAttribute('aria-label', 'Stream status: live')
-        badge.classList.remove('live-badge--offline')
-        badge.classList.add('live-badge--live')
-        if (lastOnline === false) reconnectStream()
+        const needsReconnect = lastOnline === false || isStreamDisconnected()
+        if (needsReconnect) {
+          reconnectStream()
+          // Don't flip badge to LIVE yet — let MANIFEST_PARSED handle it
+          // so the badge stays red/offline until the player actually connects
+        } else {
+          badge.textContent = '● LIVE'
+          badge.setAttribute('aria-label', 'Stream status: live')
+          badge.classList.remove('live-badge--offline')
+          badge.classList.add('live-badge--live')
+        }
       } else {
         badge.textContent = '● OFFLINE'
         badge.setAttribute('aria-label', 'Stream status: offline')
