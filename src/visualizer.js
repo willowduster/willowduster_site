@@ -45,7 +45,7 @@ export function initVisualizer(video) {
     if (connected) return
     try {
       connectAudio(video)
-    } catch (_) { /* will retry on next interaction */ }
+    } catch (e) { console.warn('[visualizer] AudioContext not ready:', e.message) }
   }
 
   video.addEventListener('play', startAudio)
@@ -113,7 +113,7 @@ function draw() {
   const minBin = Math.max(1, freqToBin(20, sampleRate, binCount))
   const maxBin = Math.min(binCount - 1, freqToBin(20000, sampleRate, binCount))
 
-  // Number of visual bars — adapt to screen width for performance
+  // ~2 device-pixels per bar (bar + gap) keeps the display readable on all screens
   const BAR_COUNT = Math.min(128, Math.floor(W / (2 * devicePixelRatio)))
   const gap       = 1 * devicePixelRatio
   const barWidth  = (W - gap * (BAR_COUNT - 1)) / BAR_COUNT
@@ -153,8 +153,8 @@ function draw() {
  */
 export function destroyVisualizer() {
   if (animId) cancelAnimationFrame(animId)
-  if (source)   source.disconnect()
-  if (analyser) analyser.disconnect()
-  if (audioCtx) audioCtx.close()
+  try { if (source)   source.disconnect() }   catch (_) {}
+  try { if (analyser) analyser.disconnect() } catch (_) {}
+  try { if (audioCtx) audioCtx.close() }      catch (_) {}
   connected = false
 }
