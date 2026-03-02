@@ -8,7 +8,6 @@ import { initVhsGlitch, initFlyingWizards } from './effects.js'
 import { initVisualizer, getAudioLevels }  from './visualizer.js'
 
 // Asset imports — Vite resolves these to correct URLs automatically
-import wizardDance from './assets/wizard-dance.gif'
 import wizardDanceSvg from './assets/wizard-dance.svg'
 import faviconImg from './assets/favicon.png'
 
@@ -31,8 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Set image sources from Vite-resolved asset imports
   const loadingWizard = document.getElementById('loading-wizard')
   if (loadingWizard) loadingWizard.src = wizardDanceSvg
-  const danceEl = document.getElementById('footer-wizard')
-  if (danceEl) danceEl.src = wizardDance
   const faviconEl = document.getElementById('favicon')
   if (faviconEl) faviconEl.href = faviconImg
 
@@ -104,6 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Fullscreen button ──────────────────────────────────────────────
   const fsBtn = document.getElementById('btn-fullscreen')
+  const exitFsBtn = document.getElementById('btn-exit-fullscreen')
   if (fsBtn) {
     fsBtn.addEventListener('click', () => {
       if (!document.fullscreenElement) {
@@ -114,6 +112,11 @@ document.addEventListener('DOMContentLoaded', () => {
     })
     document.addEventListener('fullscreenchange', () => {
       fsBtn.textContent = document.fullscreenElement ? '⊡ EXIT FS' : '⊞ FULLSCREEN'
+    })
+  }
+  if (exitFsBtn) {
+    exitFsBtn.addEventListener('click', () => {
+      if (document.fullscreenElement) document.exitFullscreen()
     })
   }
 
