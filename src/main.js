@@ -179,7 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Stream Status Polling (live badge + viewer count) ───────────
   pollStreamStatus()
-  setInterval(pollStreamStatus, 10000)
+  setInterval(pollStreamStatus, 5000)
 })
 
 // ── Stream Status ─────────────────────────────────────────────────────────────

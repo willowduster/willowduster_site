@@ -76,9 +76,26 @@ function initHlsPlayer() {
       if (banner) banner.style.display = 'none'
       video.style.display = ''
       showLiveBadge()
-      video.play().catch(() => {
-        // Autoplay blocked — user must click play manually; that's fine
-      })
+      // Muted autoplay is reliable in all browsers; after play starts,
+      // attempt to unmute so the user hears audio immediately.
+      video.muted = true
+      video.play()
+        .then(() => {
+          // Listen for browser pausing the video after unmute
+          const onPause = () => {
+            video.removeEventListener('pause', onPause)
+            video.muted = true
+            video.play().catch(() => {})
+          }
+          video.addEventListener('pause', onPause)
+          video.muted = false
+          // If the browser didn't pause synchronously, remove the listener
+          // after a short window so normal user pauses aren't intercepted.
+          setTimeout(() => video.removeEventListener('pause', onPause), 200)
+        })
+        .catch(() => {
+          // Autoplay blocked even when muted — user must click play
+        })
     })
 
     hlsInstance.on(Hls.Events.ERROR, (_, data) => {
