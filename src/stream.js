@@ -10,6 +10,38 @@ export function initStream() {
   initHlsPlayer()
 }
 
+/**
+ * Tear down current HLS player, show the offline banner, hide video.
+ * Called by pollStreamStatus when the API reports offline.
+ */
+export function disconnectStream() {
+  if (hlsInstance) {
+    hlsInstance.destroy()
+    hlsInstance = null
+  }
+  const banner = document.getElementById('stream-offline')
+  if (banner) banner.style.display = 'flex'
+  const video = document.getElementById('owncast-video')
+  if (video) video.style.display = 'none'
+}
+
+/**
+ * Tear down old HLS, hide offline banner, show video, re-init player.
+ * Called by pollStreamStatus when the API reports online but the
+ * player is currently showing the offline state.
+ */
+export function reconnectStream() {
+  if (hlsInstance) {
+    hlsInstance.destroy()
+    hlsInstance = null
+  }
+  const banner = document.getElementById('stream-offline')
+  if (banner) banner.style.display = 'none'
+  const video = document.getElementById('owncast-video')
+  if (video) video.style.display = ''
+  initHlsPlayer()
+}
+
 // ── HLS Player ────────────────────────────────────────────────────────────────
 function initHlsPlayer() {
   const video = document.getElementById('owncast-video')
