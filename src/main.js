@@ -3,7 +3,7 @@
  */
 import './style.css'
 import { CONFIG }          from './config.js'
-import { initStream, setStreamOnline, setStreamOffline } from './stream.js'
+import { initStream, setStreamOnline } from './stream.js'
 import { initVhsGlitch, initFlyingWizards } from './effects.js'
 import { initVisualizer, getAudioLevels }  from './visualizer.js'
 
@@ -156,11 +156,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Show offline state initially — first status poll will correct it
+  // Default to online mode — show the player immediately
   const offlineBanner = document.getElementById('stream-offline')
-  if (offlineBanner) offlineBanner.style.display = 'flex'
+  if (offlineBanner) offlineBanner.style.display = 'none'
   const videoEl = document.getElementById('owncast-video')
-  if (videoEl) videoEl.style.display = 'none'
+  if (videoEl) videoEl.style.display = ''
 
   // Attempt to connect HLS immediately — if the stream is already live the
   // MANIFEST_PARSED handler will flip the UI to live without waiting for the
@@ -219,10 +219,6 @@ async function pollStreamStatus() {
     }
   }
 
-  // Apply state (both functions are idempotent)
-  if (online) {
-    setStreamOnline()
-  } else {
-    setStreamOffline()
-  }
+  // Default to online mode for now — always show the player
+  setStreamOnline()
 }
