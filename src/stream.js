@@ -28,6 +28,15 @@ export function disconnectStream() {
 }
 
 /**
+ * Returns true when the HLS player has been torn down (e.g. after
+ * network retries exhausted). Used by the poller so it can retry
+ * even when lastOnline was already true.
+ */
+export function isStreamDisconnected() {
+  return hlsInstance === null
+}
+
+/**
  * Tear down old HLS, hide offline banner, show video, re-init player.
  * Called by pollStreamStatus when the API reports online but the
  * player is currently showing the offline state.
