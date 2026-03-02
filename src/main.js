@@ -3,7 +3,7 @@
  */
 import './style.css'
 import { CONFIG }          from './config.js'
-import { initStream }      from './stream.js'
+import { initStream, reconnectStream, disconnectStream } from './stream.js'
 import { initVhsGlitch, initFlyingWizards } from './effects.js'
 import { initVisualizer, getAudioLevels }  from './visualizer.js'
 
@@ -167,13 +167,18 @@ document.addEventListener('DOMContentLoaded', () => {
 })
 
 // ── Stream Status ─────────────────────────────────────────────────────────────
+let lastOnline = null // track state transitions so we only reconnect/disconnect once
+let pollFailures = 0
+const MAX_POLL_FAILURES = 2 // treat as offline after this many consecutive failures
+
 async function pollStreamStatus() {
   const countEl = document.getElementById('viewer-count')
   const badge   = document.getElementById('live-badge')
   try {
     const res = await fetch(CONFIG.owncastUrl.replace(/\/+$/, '') + '/api/status')
-    if (!res.ok) return
+    if (!res.ok) throw new Error('non-200')
     const data = await res.json()
+    pollFailures = 0
 
     // Viewer count
     if (countEl) {
@@ -182,21 +187,29 @@ async function pollStreamStatus() {
       countEl.title = `${count} viewer${count !== 1 ? 's' : ''}`
     }
 
-    // Live / Offline badge
+    // Live / Offline badge + player state
     if (badge) {
       if (data.online) {
         badge.textContent = '● LIVE'
         badge.setAttribute('aria-label', 'Stream status: live')
         badge.classList.remove('live-badge--offline')
         badge.classList.add('live-badge--live')
+        if (lastOnline === false) reconnectStream()
       } else {
         badge.textContent = '● OFFLINE'
         badge.setAttribute('aria-label', 'Stream status: offline')
         badge.classList.remove('live-badge--live')
         badge.classList.add('live-badge--offline')
+        if (lastOnline !== false) disconnectStream()
       }
+      lastOnline = data.online
     }
   } catch (_) {
-    // Network error — leave UI as-is
+    // Network error or non-200 — treat as offline after consecutive failures
+    pollFailures++
+    if (pollFailures >= MAX_POLL_FAILURES && lastOnline !== false) {
+      disconnectStream()
+      lastOnline = false
+    }
   }
 }

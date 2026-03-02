@@ -5,6 +5,8 @@ import Hls from 'hls.js'
 import { CONFIG } from './config.js'
 
 let hlsInstance = null
+let hlsNetworkRetries = 0
+const MAX_HLS_RETRIES = 3
 
 export function initStream() {
   initHlsPlayer()
@@ -35,6 +37,7 @@ export function reconnectStream() {
     hlsInstance.destroy()
     hlsInstance = null
   }
+  hlsNetworkRetries = 0
   const banner = document.getElementById('stream-offline')
   if (banner) banner.style.display = 'none'
   const video = document.getElementById('owncast-video')
@@ -57,6 +60,7 @@ function initHlsPlayer() {
     hlsInstance.attachMedia(video)
 
     hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+      hlsNetworkRetries = 0
       showLiveBadge()
       video.play().catch(() => {
         // Autoplay blocked — user must click play manually; that's fine
@@ -67,7 +71,14 @@ function initHlsPlayer() {
       if (data.fatal) {
         switch (data.type) {
           case Hls.ErrorTypes.NETWORK_ERROR:
-            hlsInstance.startLoad()
+            hlsNetworkRetries++
+            if (hlsNetworkRetries <= MAX_HLS_RETRIES) {
+              hlsInstance.startLoad()
+            } else {
+              hlsInstance.destroy()
+              hlsInstance = null
+              showOfflineBanner()
+            }
             break
           case Hls.ErrorTypes.MEDIA_ERROR:
             hlsInstance.recoverMediaError()
