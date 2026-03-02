@@ -149,6 +149,45 @@ function draw() {
 }
 
 /**
+ * Return current audio energy levels split into frequency bands.
+ * Returns null when the analyser is not yet connected.
+ *
+ * @returns {{ bass: number, mid: number, high: number, overall: number } | null}
+ *          Each value is 0-255.
+ */
+export function getAudioLevels() {
+  if (!analyser || !dataArray) return null
+
+  analyser.getByteFrequencyData(dataArray)
+
+  const sampleRate = audioCtx.sampleRate
+  const binCount   = analyser.frequencyBinCount
+
+  // Band boundaries (Hz)
+  const bassBin = freqToBin(250,   sampleRate, binCount)
+  const midBin  = freqToBin(4000,  sampleRate, binCount)
+  const hiBin   = freqToBin(20000, sampleRate, binCount)
+
+  let bassSum = 0, midSum = 0, hiSum = 0, allSum = 0
+  let bassN = 0, midN = 0, hiN = 0
+
+  for (let i = 1; i < hiBin && i < binCount; i++) {
+    const v = dataArray[i]
+    allSum += v
+    if (i < bassBin)       { bassSum += v; bassN++ }
+    else if (i < midBin)   { midSum  += v; midN++  }
+    else                   { hiSum   += v; hiN++   }
+  }
+
+  return {
+    bass:    bassN > 0 ? bassSum / bassN : 0,
+    mid:     midN  > 0 ? midSum  / midN  : 0,
+    high:    hiN   > 0 ? hiSum   / hiN   : 0,
+    overall: hiBin > 1 ? allSum / (hiBin - 1) : 0,
+  }
+}
+
+/**
  * Clean up — call if you need to tear down the visualizer.
  */
 export function destroyVisualizer() {

@@ -1,5 +1,8 @@
 /**
  * effects.js — Matrix rain canvas, CRT flicker, VHS glitch lines, particles.
+ *
+ * When an audioLevelsFn is provided, effects react to the Owncast stream
+ * frequencies (bass / mid / high / overall).
  */
 
 // ── Matrix Rain ──────────────────────────────────────────────────────────────
@@ -40,19 +43,29 @@ export function initMatrixRain() {
 }
 
 // ── VHS Tracking Glitch ───────────────────────────────────────────────────────
-export function initVhsGlitch() {
+let _vhsAudioFn = null
+
+export function initVhsGlitch(audioLevelsFn) {
   const playerWrap = document.querySelector('.player-wrapper')
   if (!playerWrap) return
+  if (audioLevelsFn) _vhsAudioFn = audioLevelsFn
+
+  let prevHigh = 0
 
   function glitch() {
+    const levels = _vhsAudioFn ? _vhsAudioFn() : null
+    // Scale glitch intensity with high-frequency energy
+    const intensity = levels ? Math.min(levels.high / 180, 1) : 1
+    const height = (2 + Math.random() * 4) * (0.5 + intensity)
+
     const line = document.createElement('div')
     line.className = 'vhs-line'
     line.style.cssText = `
       position:absolute;
       left:0;right:0;
-      height:${2 + Math.random() * 4}px;
+      height:${height}px;
       top:${Math.random() * 100}%;
-      background:rgba(255,255,255,0.06);
+      background:rgba(255,255,255,${0.04 + intensity * 0.06});
       pointer-events:none;
       z-index:10;
       animation:vhsFade 0.3s linear forwards;
@@ -62,13 +75,26 @@ export function initVhsGlitch() {
     setTimeout(() => line.remove(), 300)
   }
 
-  // Trigger random glitches every 3-8 seconds
+  // Audio-reactive: trigger glitches more often when treble is loud
   function scheduleGlitch() {
+    const levels = _vhsAudioFn ? _vhsAudioFn() : null
+    // Transient detection: trigger faster when high-freq energy spikes
+    let delay = 3000 + Math.random() * 5000
+    if (levels) {
+      const highNorm = levels.high / 255
+      // More energy → shorter delay (minimum ~1s)
+      delay = Math.max(1000, delay * (1 - highNorm * 0.6))
+      // Extra burst on transient
+      if (levels.high > 120 && levels.high - prevHigh > 40) {
+        setTimeout(glitch, 40)
+      }
+      prevHigh = levels.high
+    }
     setTimeout(() => {
       glitch()
       if (Math.random() > 0.5) setTimeout(glitch, 80)
       scheduleGlitch()
-    }, 3000 + Math.random() * 5000)
+    }, delay)
   }
   scheduleGlitch()
 }
@@ -142,11 +168,14 @@ export function initCrtFlicker() {
 // spriteSources: array of entries — either:
 //   string URL (single-frame, e.g. wizard-dance.svg)
 //   { url, frames } (WebP sprite sheet, already resolved)
-export function initFlyingWizards(spriteSources) {
+let _wizAudioFn = null
+
+export function initFlyingWizards(spriteSources, audioLevelsFn) {
   const sprites = Array.isArray(spriteSources) ? spriteSources : [spriteSources]
-  const WIZARD_COUNT = 16
-  const SPAWN_INTERVAL = 3000
-  const FG_INTERVAL_MS = 15 * 1000
+  if (audioLevelsFn) _wizAudioFn = audioLevelsFn
+  const WIZARD_COUNT = 32
+  const SPAWN_INTERVAL = 1800
+  const FG_INTERVAL_MS = 10 * 1000
 
   const bgLayer = document.createElement('div')
   bgLayer.className = 'flying-wizards-bg'
@@ -228,16 +257,28 @@ export function initFlyingWizards(spriteSources) {
   }
 
   function update() {
+    const levels = _wizAudioFn ? _wizAudioFn() : null
+    // Audio multipliers: bass drives speed, overall drives wobble
+    const speedMul = levels ? (1 + (levels.bass / 255) * 1.5) : 1
+    const wobbleMul = levels ? (1 + (levels.overall / 255) * 2) : 1
+    const glowIntensity = levels ? Math.min(levels.bass / 200, 1) : 0
+
     for (let i = wizards.length - 1; i >= 0; i--) {
       const w = wizards[i]
-      w.x += w.vx
-      w.y += w.vy
-      w.rot += w.spinSpeed
-      w.wobblePhase += w.wobbleFreq
+      w.x += w.vx * speedMul
+      w.y += w.vy * speedMul
+      w.rot += w.spinSpeed * speedMul
+      w.wobblePhase += w.wobbleFreq * wobbleMul
 
-      const wobbleX = Math.sin(w.wobblePhase) * w.wobbleAmp
+      const wobbleX = Math.sin(w.wobblePhase) * w.wobbleAmp * wobbleMul
 
       w.el.style.transform = `translate(${w.x + wobbleX}px, ${w.y}px) rotate(${w.rot}deg)`
+
+      // Modulate glow based on bass
+      if (levels && w.el.classList.contains('flying-wizard--fg')) {
+        const g = Math.round(12 + glowIntensity * 30)
+        w.el.style.filter = `drop-shadow(0 0 ${g}px rgba(0,255,47,${0.4 + glowIntensity * 0.4}))`
+      }
 
       if (w.x < -w.size * 2 || w.y > window.innerHeight + w.size * 2) {
         w.el.remove()
@@ -247,9 +288,24 @@ export function initFlyingWizards(spriteSources) {
     requestAnimationFrame(update)
   }
 
-  for (let i = 0; i < 4; i++) {
-    setTimeout(spawnWizard, i * 600)
+  // Audio-reactive spawning: spawn extra wizards on bass hits
+  let spawnTimer = null
+  function scheduleSpawn() {
+    const levels = _wizAudioFn ? _wizAudioFn() : null
+    let interval = SPAWN_INTERVAL
+    if (levels) {
+      // More bass → faster spawning (minimum ~800ms)
+      interval = Math.max(800, SPAWN_INTERVAL * (1 - (levels.bass / 255) * 0.6))
+    }
+    spawnTimer = setTimeout(() => {
+      spawnWizard()
+      scheduleSpawn()
+    }, interval)
   }
-  setInterval(spawnWizard, SPAWN_INTERVAL)
+
+  for (let i = 0; i < 6; i++) {
+    setTimeout(spawnWizard, i * 400)
+  }
+  scheduleSpawn()
   requestAnimationFrame(update)
 }
