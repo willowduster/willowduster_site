@@ -3,7 +3,7 @@
  */
 import './style.css'
 import { CONFIG }          from './config.js'
-import { initStream, reconnectStream, disconnectStream, isStreamDisconnected } from './stream.js'
+import { reconnectStream, disconnectStream, isStreamDisconnected } from './stream.js'
 import { initVhsGlitch, initFlyingWizards } from './effects.js'
 import { initVisualizer, getAudioLevels }  from './visualizer.js'
 
@@ -148,8 +148,11 @@ document.addEventListener('DOMContentLoaded', () => {
     ssBtn.textContent = '◈ SCREENSAVER'
   }
 
-  // Stream player
-  initStream()
+  // Show offline state initially — first status poll will correct it
+  const offlineBanner = document.getElementById('stream-offline')
+  if (offlineBanner) offlineBanner.style.display = 'flex'
+  const videoEl = document.getElementById('owncast-video')
+  if (videoEl) videoEl.style.display = 'none'
 
   // Audio frequency visualizer
   const video = document.getElementById('owncast-video')
@@ -190,16 +193,12 @@ async function pollStreamStatus() {
     // Live / Offline badge + player state
     if (badge) {
       if (data.online) {
-        const needsReconnect = lastOnline === false || isStreamDisconnected()
-        if (needsReconnect) {
+        badge.textContent = '● LIVE'
+        badge.setAttribute('aria-label', 'Stream status: live')
+        badge.classList.remove('live-badge--offline')
+        badge.classList.add('live-badge--live')
+        if (lastOnline !== true || isStreamDisconnected()) {
           reconnectStream()
-          // Don't flip badge to LIVE yet — let MANIFEST_PARSED handle it
-          // so the badge stays red/offline until the player actually connects
-        } else {
-          badge.textContent = '● LIVE'
-          badge.setAttribute('aria-label', 'Stream status: live')
-          badge.classList.remove('live-badge--offline')
-          badge.classList.add('live-badge--live')
         }
       } else {
         badge.textContent = '● OFFLINE'

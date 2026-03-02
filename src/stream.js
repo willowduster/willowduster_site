@@ -112,14 +112,6 @@ function showOfflineBanner() {
   if (banner) banner.style.display = 'flex'
   const video = document.getElementById('owncast-video')
   if (video)  video.style.display  = 'none'
-  // Update LIVE badge to offline
-  const badge = document.getElementById('live-badge')
-  if (badge) {
-    badge.textContent = '● OFFLINE'
-    badge.setAttribute('aria-label', 'Stream status: offline')
-    badge.classList.remove('live-badge--live')
-    badge.classList.add('live-badge--offline')
-  }
 }
 
 function showLiveBadge() {
