@@ -4,7 +4,7 @@
 import './style.css'
 import { CONFIG }          from './config.js'
 import { initStream, setStreamOnline } from './stream.js'
-import { initVhsGlitch, initFlyingWizards } from './effects.js'
+import { initFlyingWizards } from './effects.js'
 import { initVisualizer, getAudioLevels }  from './visualizer.js'
 
 // Asset imports — Vite resolves these to correct URLs automatically
@@ -170,12 +170,23 @@ document.addEventListener('DOMContentLoaded', () => {
   // API poll (which may fail due to CORS / network issues).
   initStream()
 
-  // Audio frequency visualizer
+  // Audio frequency visualizer (default off — toggled via footer button)
   const video = document.getElementById('owncast-video')
   if (video) initVisualizer(video)
+  // Hide visualizer canvas by default
+  const vizCanvas = document.getElementById('visualizer-canvas')
+  if (vizCanvas) vizCanvas.style.display = 'none'
 
-  // VHS glitch on stream wrapper (audio-reactive)
-  initVhsGlitch(getAudioLevels)
+  // ── Visualizer toggle button ───────────────────────────────────
+  const vizBtn = document.getElementById('btn-visualizer')
+  let vizActive = false
+  if (vizBtn && vizCanvas) {
+    vizBtn.addEventListener('click', () => {
+      vizActive = !vizActive
+      vizCanvas.style.display = vizActive ? '' : 'none'
+      vizBtn.textContent = vizActive ? '♫ HIDE VIZ' : '♫ VISUALIZER'
+    })
+  }
 
   // Flying wizard screensaver — full sprite pool (audio-reactive)
   initFlyingWizards(SPRITE_POOL, getAudioLevels)

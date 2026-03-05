@@ -1,107 +1,9 @@
 /**
- * effects.js — Matrix rain canvas, CRT flicker, VHS glitch lines, particles.
+ * effects.js — Floating particles, flying wizards.
  *
  * When an audioLevelsFn is provided, effects react to the Owncast stream
  * frequencies (bass / mid / high / overall).
  */
-
-// ── Matrix Rain ──────────────────────────────────────────────────────────────
-export function initMatrixRain() {
-  const canvas = document.getElementById('matrix-canvas')
-  if (!canvas) return
-  const ctx = canvas.getContext('2d')
-
-  const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ@#$%&'
-  let cols, drops
-
-  function resize() {
-    canvas.width  = window.innerWidth
-    canvas.height = window.innerHeight
-    cols  = Math.floor(canvas.width / 16)
-    drops = Array(cols).fill(1)
-  }
-
-  resize()
-  window.addEventListener('resize', resize)
-
-  function draw() {
-    ctx.fillStyle = 'rgba(10,10,15,0.05)'
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-    ctx.fillStyle = '#00ff2f'
-    ctx.font = '14px monospace'
-
-    for (let i = 0; i < drops.length; i++) {
-      const char = chars[Math.floor(Math.random() * chars.length)]
-      ctx.fillText(char, i * 16, drops[i] * 16)
-      if (drops[i] * 16 > canvas.height && Math.random() > 0.975) drops[i] = 0
-      drops[i]++
-    }
-  }
-
-  setInterval(draw, 50)
-}
-
-// ── VHS Tracking Glitch ───────────────────────────────────────────────────────
-let _vhsAudioFn = null
-
-// Audio-reactive thresholds for VHS glitch
-const HIGH_FREQ_THRESHOLD = 120
-const TRANSIENT_DELTA = 40
-
-export function initVhsGlitch(audioLevelsFn) {
-  const playerWrap = document.querySelector('.player-wrapper')
-  if (!playerWrap) return
-  if (audioLevelsFn) _vhsAudioFn = audioLevelsFn
-
-  let prevHigh = 0
-
-  function glitch() {
-    const levels = _vhsAudioFn ? _vhsAudioFn() : null
-    // Scale glitch intensity with high-frequency energy
-    const intensity = levels ? Math.min(levels.high / 180, 1) : 1
-    const height = (2 + Math.random() * 4) * (0.5 + intensity)
-
-    const line = document.createElement('div')
-    line.className = 'vhs-line'
-    line.style.cssText = `
-      position:absolute;
-      left:0;right:0;
-      height:${height}px;
-      top:${Math.random() * 100}%;
-      background:rgba(255,255,255,${0.04 + intensity * 0.06});
-      pointer-events:none;
-      z-index:10;
-      animation:vhsFade 0.3s linear forwards;
-    `
-    playerWrap.style.position = 'relative'
-    playerWrap.appendChild(line)
-    setTimeout(() => line.remove(), 300)
-  }
-
-  // Audio-reactive: trigger glitches more often when treble is loud
-  function scheduleGlitch() {
-    const levels = _vhsAudioFn ? _vhsAudioFn() : null
-    // Transient detection: trigger faster when high-freq energy spikes
-    let delay = 3000 + Math.random() * 5000
-    if (levels) {
-      const highNorm = levels.high / 255
-      // More energy → shorter delay (minimum ~1s)
-      delay = Math.max(1000, delay * (1 - highNorm * 0.6))
-      // Extra burst on transient
-      if (levels.high > HIGH_FREQ_THRESHOLD && levels.high - prevHigh > TRANSIENT_DELTA) {
-        setTimeout(glitch, 40)
-      }
-      prevHigh = levels.high
-    }
-    setTimeout(() => {
-      glitch()
-      if (Math.random() > 0.5) setTimeout(glitch, 80)
-      scheduleGlitch()
-    }, delay)
-  }
-  scheduleGlitch()
-}
 
 // ── Floating Particles ────────────────────────────────────────────────────────
 // Named constant for particle count — increase for more visual intensity
@@ -146,26 +48,6 @@ export function initTypingEffect(element, text, speed = 60) {
     i++
     if (i >= text.length) clearInterval(timer)
   }, speed)
-}
-
-// Named timing constants for CRT flicker scheduling
-const MIN_FLICKER_DELAY = 5000   // ms — minimum gap between flickers
-const MAX_FLICKER_DELAY = 15000  // ms — additional random jitter on top
-export function initCrtFlicker() {
-  const crt = document.querySelector('.crt-overlay')
-  if (!crt) return
-  // Occasionally make the whole screen flicker slightly
-  function flicker() {
-    const delay = MIN_FLICKER_DELAY + Math.random() * MAX_FLICKER_DELAY
-    setTimeout(() => {
-      document.body.style.opacity = '0.85'
-      setTimeout(() => {
-        document.body.style.opacity = '1'
-        flicker()
-      }, 60 + Math.random() * 80)
-    }, delay)
-  }
-  flicker()
 }
 
 // ── Flying Wizards (Flying Toasters homage) ──────────────────────────────────
