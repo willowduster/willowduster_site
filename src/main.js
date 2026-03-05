@@ -31,6 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if (loadingWizard) loadingWizard.src = wizardDanceSvg
   const faviconEl = document.getElementById('favicon')
   if (faviconEl) faviconEl.href = faviconImg
+  const ssWizard = document.getElementById('screensaver-wizard')
+  if (ssWizard) ssWizard.src = wizardDanceSvg
 
   // ── Offline placeholder: show random sprite instead of text ────────
   const offlineEl = document.getElementById('stream-offline')

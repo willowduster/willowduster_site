@@ -917,9 +917,10 @@ footer {
   animation: screensaverFloat 8s ease-in-out infinite;
 }
 
-.screensaver-logo .site-logo {
-  width: 160px;
-  height: 160px;
+.screensaver-wizard {
+  width: 200px;
+  height: 200px;
+  image-rendering: pixelated;
   filter: drop-shadow(0 0 30px rgba(0,255,47,0.6)) drop-shadow(0 0 60px rgba(0,255,47,0.3));
 }
 
