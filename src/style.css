@@ -1048,9 +1048,19 @@ footer {
 :fullscreen .exit-fullscreen-btn {
   display: block;
 }
+:-webkit-full-screen .exit-fullscreen-btn {
+  display: block;
+}
 
 /* ── Fullscreen video ─────────────────────────────────────────────────── */
 :fullscreen .player-wrapper {
+  height: 100vh;
+  max-height: 100vh;
+  border: none;
+  box-shadow: none;
+  animation: none;
+}
+:-webkit-full-screen .player-wrapper {
   height: 100vh;
   max-height: 100vh;
   border: none;
@@ -1119,9 +1129,18 @@ footer {
 :fullscreen #visualizer-canvas {
   display: none;
 }
+:-webkit-full-screen #visualizer-canvas {
+  display: none;
+}
 
 /* Show visualizer in screensaver mode (which uses fullscreen) */
 :fullscreen #app.screensaver-active ~ #visualizer-canvas {
+  display: block;
+  bottom: 16px;
+  left: 16px;
+  width: calc(100% - 32px);
+}
+:-webkit-full-screen #app.screensaver-active ~ #visualizer-canvas {
   display: block;
   bottom: 16px;
   left: 16px;

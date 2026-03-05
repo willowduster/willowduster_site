@@ -92,24 +92,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+  // ── Fullscreen helpers (cross-browser + mobile) ─────────────────────
+  function getFullscreenElement() {
+    return document.fullscreenElement
+      || document.webkitFullscreenElement
+      || document.msFullscreenElement
+      || null
+  }
+
+  function requestFS(el) {
+    const rfs = el.requestFullscreen
+      || el.webkitRequestFullscreen
+      || el.msRequestFullscreen
+    if (rfs) return rfs.call(el).catch(() => {})
+    return Promise.resolve()
+  }
+
+  function exitFS() {
+    const efs = document.exitFullscreen
+      || document.webkitExitFullscreen
+      || document.msExitFullscreen
+    if (efs) efs.call(document)
+  }
+
+  // Listen for all vendor-prefixed fullscreen change events
+  const fsChangeEvents = ['fullscreenchange', 'webkitfullscreenchange', 'MSFullscreenChange']
+
   // ── Fullscreen button ──────────────────────────────────────────────
   const fsBtn = document.getElementById('btn-fullscreen')
   const exitFsBtn = document.getElementById('btn-exit-fullscreen')
   if (fsBtn) {
     fsBtn.addEventListener('click', () => {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(() => {})
+      if (!getFullscreenElement()) {
+        requestFS(document.documentElement)
       } else {
-        document.exitFullscreen()
+        exitFS()
       }
     })
-    document.addEventListener('fullscreenchange', () => {
-      fsBtn.textContent = document.fullscreenElement ? '⊡ EXIT FS' : '⊞ FULLSCREEN'
+    fsChangeEvents.forEach(evt => {
+      document.addEventListener(evt, () => {
+        fsBtn.textContent = getFullscreenElement() ? '⊡ EXIT FS' : '⊞ FULLSCREEN'
+      })
     })
   }
   if (exitFsBtn) {
     exitFsBtn.addEventListener('click', () => {
-      if (document.fullscreenElement) document.exitFullscreen()
+      if (getFullscreenElement()) exitFS()
     })
   }
 
@@ -129,8 +157,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Auto-enable visualizer for screensaver
         enableViz()
         // Enter fullscreen when screensaver activates
-        if (!document.fullscreenElement) {
-          document.documentElement.requestFullscreen().catch(() => {})
+        if (!getFullscreenElement()) {
+          requestFS(document.documentElement)
         }
       } else {
         exitScreensaver()
@@ -149,8 +177,8 @@ document.addEventListener('DOMContentLoaded', () => {
     ssOverlay.classList.remove('active')
     ssBtn.textContent = '◈ SCREENSAVER'
     // Exit fullscreen when screensaver deactivates
-    if (document.fullscreenElement) {
-      document.exitFullscreen()
+    if (getFullscreenElement()) {
+      exitFS()
     }
   }
 
