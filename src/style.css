@@ -1114,3 +1114,9 @@ footer {
   z-index: 9;
   opacity: 0.7;
 }
+
+:fullscreen #visualizer-canvas {
+  bottom: 16px;
+  left: 16px;
+  width: calc(100% - 32px);
+}
