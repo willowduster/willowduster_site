@@ -131,6 +131,8 @@ document.addEventListener('DOMContentLoaded', () => {
         app.classList.add('screensaver-active')
         ssOverlay.classList.add('active')
         ssBtn.textContent = '✕ EXIT SS'
+        // Auto-enable visualizer for screensaver
+        enableViz()
         // Enter fullscreen when screensaver activates
         if (!document.fullscreenElement) {
           document.documentElement.requestFullscreen().catch(() => {})
@@ -180,16 +182,30 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Visualizer toggle button ───────────────────────────────────
   const vizBtn = document.getElementById('btn-visualizer')
   let vizActive = false
+
+  function enableViz() {
+    if (vizActive) return
+    vizActive = true
+    if (vizCanvas) vizCanvas.style.display = ''
+    if (vizBtn) vizBtn.textContent = '♫ HIDE VIZ'
+    // Lazy-init: only connect Web Audio on first enable
+    if (!vizInitialised && video) {
+      initVisualizer(video)
+      vizInitialised = true
+    }
+  }
+
+  function disableViz() {
+    if (!vizActive) return
+    vizActive = false
+    if (vizCanvas) vizCanvas.style.display = 'none'
+    if (vizBtn) vizBtn.textContent = '♫ VISUALIZER'
+  }
+
   if (vizBtn && vizCanvas) {
     vizBtn.addEventListener('click', () => {
-      vizActive = !vizActive
-      vizCanvas.style.display = vizActive ? '' : 'none'
-      vizBtn.textContent = vizActive ? '♫ HIDE VIZ' : '♫ VISUALIZER'
-      // Lazy-init: only connect Web Audio when user first enables visualizer
-      if (vizActive && !vizInitialised && video) {
-        initVisualizer(video)
-        vizInitialised = true
-      }
+      if (vizActive) disableViz()
+      else enableViz()
     })
   }
 

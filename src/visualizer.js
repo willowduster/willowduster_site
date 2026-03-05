@@ -33,11 +33,17 @@ export function initVisualizer(video) {
 
   // Resize canvas to match CSS size on window resize
   function resize() {
+    // Skip resize if canvas is hidden (clientWidth/Height are 0)
+    if (canvas.clientWidth === 0 || canvas.clientHeight === 0) return
     canvas.width  = canvas.clientWidth  * devicePixelRatio
     canvas.height = canvas.clientHeight * devicePixelRatio
   }
   resize()
   window.addEventListener('resize', resize)
+
+  // Also resize when the canvas becomes visible again
+  const resizeObs = new ResizeObserver(() => resize())
+  resizeObs.observe(canvas)
 
   // We need user interaction to start AudioContext (browser autoplay policy).
   // Attach to common interaction events on the video and document.
