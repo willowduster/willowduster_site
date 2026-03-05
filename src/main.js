@@ -105,6 +105,11 @@ document.addEventListener('DOMContentLoaded', () => {
     })
     document.addEventListener('fullscreenchange', () => {
       fsBtn.textContent = document.fullscreenElement ? '⊡ EXIT FS' : '⊞ FULLSCREEN'
+      // Hide visualizer in fullscreen (unless screensaver is active)
+      const vizCanvas = document.getElementById('visualizer-canvas')
+      if (vizCanvas) {
+        vizCanvas.style.display = (document.fullscreenElement && !screensaverActive) ? 'none' : ''
+      }
     })
   }
   if (exitFsBtn) {
