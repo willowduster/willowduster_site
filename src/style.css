@@ -1115,7 +1115,14 @@ footer {
   opacity: 0.7;
 }
 
+/* Hide visualizer in regular fullscreen */
 :fullscreen #visualizer-canvas {
+  display: none;
+}
+
+/* Show visualizer in screensaver mode (which uses fullscreen) */
+:fullscreen #app.screensaver-active ~ #visualizer-canvas {
+  display: block;
   bottom: 16px;
   left: 16px;
   width: calc(100% - 32px);
