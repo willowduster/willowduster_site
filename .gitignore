@@ -4,5 +4,5 @@ dist/
 .env.local
 *.local
 design.zip
-design/
+design/models/
 dist/

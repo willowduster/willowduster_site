@@ -11,14 +11,13 @@ import { initVisualizer, getAudioLevels }  from './visualizer.js'
 import wizardDanceSvg from './assets/wizard-dance.svg'
 import faviconImg from './assets/favicon.png'
 
-// WebP sprite sheet URLs — eagerly resolved at build time (just URL strings)
+// WebP animated image URLs — eagerly resolved at build time (just URL strings)
 const webpUrls = import.meta.glob('./assets/*.webp', { eager: true, query: '?url', import: 'default' })
 
-// Build sprite pool: each WebP is a 16-frame vertical sprite sheet
-const FRAMES = 16
+// Build sprite pool: each entry is a URL string (animated WebP or SVG)
 const SPRITE_POOL = [
-  wizardDanceSvg, // animated SVG — single-frame string
-  ...Object.values(webpUrls).map(url => ({ url, frames: FRAMES })),
+  wizardDanceSvg,
+  ...Object.values(webpUrls),
 ]
 
 /** Pick a random sprite entry from the pool */
@@ -38,18 +37,12 @@ document.addEventListener('DOMContentLoaded', () => {
   if (offlineEl) {
     const sprite = randomSprite()
     offlineEl.innerHTML = ''
-    if (typeof sprite === 'string') {
-      const offImg = document.createElement('img')
-      offImg.src = sprite
-      offImg.className = 'offline-sprite'
-      offImg.alt = ''
-      offlineEl.appendChild(offImg)
-    } else {
-      const offDiv = document.createElement('div')
-      offDiv.className = 'offline-sprite offline-sprite-sheet'
-      offDiv.style.backgroundImage = `url(${sprite.url})`
-      offlineEl.appendChild(offDiv)
-    }
+    // All sprites are URL strings now (animated WebP or SVG)
+    const offImg = document.createElement('img')
+    offImg.src = sprite
+    offImg.className = 'offline-sprite'
+    offImg.alt = ''
+    offlineEl.appendChild(offImg)
     const offText = document.createElement('p')
     offText.className = 'offline-text'
     offText.textContent = 'SIGNAL LOST'
@@ -171,11 +164,13 @@ document.addEventListener('DOMContentLoaded', () => {
   initStream()
 
   // Audio frequency visualizer (default off — toggled via footer button)
+  // IMPORTANT: Don't connect audio until user explicitly enables the visualizer.
+  // createMediaElementSource() takes exclusive control of the video’s audio
+  // pipeline and can break HLS playback if CORS isn’t perfectly configured.
   const video = document.getElementById('owncast-video')
-  if (video) initVisualizer(video)
-  // Hide visualizer canvas by default
   const vizCanvas = document.getElementById('visualizer-canvas')
   if (vizCanvas) vizCanvas.style.display = 'none'
+  let vizInitialised = false
 
   // ── Visualizer toggle button ───────────────────────────────────
   const vizBtn = document.getElementById('btn-visualizer')
@@ -185,6 +180,11 @@ document.addEventListener('DOMContentLoaded', () => {
       vizActive = !vizActive
       vizCanvas.style.display = vizActive ? '' : 'none'
       vizBtn.textContent = vizActive ? '♫ HIDE VIZ' : '♫ VISUALIZER'
+      // Lazy-init: only connect Web Audio when user first enables visualizer
+      if (vizActive && !vizInitialised && video) {
+        initVisualizer(video)
+        vizInitialised = true
+      }
     })
   }
 

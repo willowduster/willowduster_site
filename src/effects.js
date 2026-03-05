@@ -51,9 +51,7 @@ export function initTypingEffect(element, text, speed = 60) {
 }
 
 // ── Flying Wizards (Flying Toasters homage) ──────────────────────────────────
-// spriteSources: array of entries — either:
-//   string URL (single-frame, e.g. wizard-dance.svg)
-//   { url, frames } (WebP sprite sheet, already resolved)
+// spriteSources: array of URL strings (animated WebP or SVG)
 let _wizAudioFn = null
 
 // Audio-reactive tuning for flying wizards
@@ -96,24 +94,12 @@ export function initFlyingWizards(spriteSources, audioLevelsFn) {
       : 60 + Math.random() * 300
 
     let el
-    if (typeof sprite === 'string') {
-      // Single-frame image (e.g. wizard-dance.svg)
-      el = document.createElement('img')
-      el.src = sprite
-      el.className = 'flying-wizard'
-      el.style.width = size + 'px'
-      el.style.height = size + 'px'
-    } else {
-      // WebP sprite sheet: { url, frames }
-      el = document.createElement('div')
-      el.className = 'flying-wizard flying-sprite'
-      el.style.width = size + 'px'
-      el.style.height = size + 'px'
-      el.style.backgroundImage = `url(${sprite.url})`
-      el.style.backgroundSize = `${size}px ${size * sprite.frames}px`
-      el.style.setProperty('--sprite-frames', sprite.frames)
-      el.style.setProperty('--sprite-offset', `-${size * sprite.frames}px`)
-    }
+    // All sprites are now URL strings — use <img> for both SVG and animated WebP
+    el = document.createElement('img')
+    el.src = sprite
+    el.className = 'flying-wizard'
+    el.style.width = size + 'px'
+    el.style.height = size + 'px'
 
     if (isForeground) el.classList.add('flying-wizard--fg')
 
