@@ -63,6 +63,7 @@ function initHlsPlayer() {
       const banner = document.getElementById('stream-offline')
       if (banner) banner.style.display = 'none'
       video.style.display = ''
+      setBadgeLive(true)
       // Try unmuted autoplay first; fall back to muted if the browser blocks it.
       video.muted = false
       video.play()
@@ -110,6 +111,23 @@ function showOfflineBanner() {
   if (banner) banner.style.display = 'flex'
   const video = document.getElementById('owncast-video')
   if (video)  video.style.display  = 'none'
+  setBadgeLive(false)
+}
+
+function setBadgeLive(live) {
+  const badge = document.getElementById('live-badge')
+  if (!badge) return
+  if (live) {
+    badge.textContent = '● LIVE'
+    badge.setAttribute('aria-label', 'Stream status: live')
+    badge.classList.remove('live-badge--offline')
+    badge.classList.add('live-badge--live')
+  } else {
+    badge.textContent = '● OFFLINE'
+    badge.setAttribute('aria-label', 'Stream status: offline')
+    badge.classList.remove('live-badge--live')
+    badge.classList.add('live-badge--offline')
+  }
 }
 
 

@@ -2,6 +2,27 @@ import { defineConfig } from 'vite'
 
 export default defineConfig({
   base: '/willowduster_site/',
+  server: {
+    // Proxy Owncast requests in dev to avoid CORS / mixed-content issues
+    proxy: {
+      '/hls': {
+        target: 'https://stream.willowduster.com',
+        changeOrigin: true,
+        secure: true,
+      },
+      '/api': {
+        target: 'https://stream.willowduster.com',
+        changeOrigin: true,
+        secure: true,
+      },
+      '/ws': {
+        target: 'wss://stream.willowduster.com',
+        changeOrigin: true,
+        ws: true,
+        secure: true,
+      },
+    },
+  },
   build: {
     outDir: 'dist',
     // Raised above default (500 KB) because hls.js is intentionally split into its own chunk

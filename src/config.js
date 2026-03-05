@@ -8,11 +8,14 @@
 
 const env = import.meta.env
 
+const isDev = import.meta.env.DEV
+
 export const CONFIG = {
   // Owncast server URL (base, HLS, and WebSocket)
-  owncastUrl:    env.VITE_OWNCAST_URL     || 'https://stream.willowduster.com',
-  owncastHlsUrl: env.VITE_OWNCAST_HLS_URL || 'https://stream.willowduster.com/hls/stream.m3u8',
-  owncastWsUrl:  env.VITE_OWNCAST_WS_URL  || 'wss://stream.willowduster.com/ws',
+  // In dev mode, use relative URLs so Vite's proxy handles CORS
+  owncastUrl:    env.VITE_OWNCAST_URL     || (isDev ? '' : 'https://stream.willowduster.com'),
+  owncastHlsUrl: env.VITE_OWNCAST_HLS_URL || (isDev ? '/hls/stream.m3u8' : 'https://stream.willowduster.com/hls/stream.m3u8'),
+  owncastWsUrl:  env.VITE_OWNCAST_WS_URL  || (isDev ? `ws://${location.host}/ws` : 'wss://stream.willowduster.com/ws'),
 
   // YouTube
   youtubeLiveUrl: env.VITE_YOUTUBE_LIVE_URL || '',
