@@ -5,21 +5,24 @@ export default defineConfig({
   server: {
     // Proxy Owncast requests in dev to avoid CORS / mixed-content issues
     proxy: {
-      '/hls': {
+      '/willowduster_site/hls': {
         target: 'https://stream.willowduster.com',
         changeOrigin: true,
         secure: true,
+        rewrite: (path) => path.replace(/^\/willowduster_site/, ''),
       },
-      '/api': {
+      '/willowduster_site/api': {
         target: 'https://stream.willowduster.com',
         changeOrigin: true,
         secure: true,
+        rewrite: (path) => path.replace(/^\/willowduster_site/, ''),
       },
-      '/ws': {
+      '/willowduster_site/ws': {
         target: 'wss://stream.willowduster.com',
         changeOrigin: true,
         ws: true,
         secure: true,
+        rewrite: (path) => path.replace(/^\/willowduster_site/, ''),
       },
     },
   },
