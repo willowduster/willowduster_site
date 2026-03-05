@@ -199,14 +199,11 @@ document.addEventListener('DOMContentLoaded', () => {
 // ── Stream Status ─────────────────────────────────────────────────────────────
 async function pollStreamStatus() {
   const countEl = document.getElementById('viewer-count')
-  const badge   = document.getElementById('live-badge')
 
-  let online = false
   try {
     const res = await fetch(CONFIG.owncastUrl.replace(/\/+$/, '') + '/api/status')
     if (!res.ok) throw new Error('non-200')
     const data = await res.json()
-    online = !!data.online
 
     // Viewer count
     if (countEl) {
@@ -215,24 +212,9 @@ async function pollStreamStatus() {
       countEl.title = `${count} viewer${count !== 1 ? 's' : ''}`
     }
   } catch (_) {
-    online = false
+    // API unreachable (CORS, network, etc.) — badge is managed by stream.js
   }
 
-  // Badge
-  if (badge) {
-    if (online) {
-      badge.textContent = '● LIVE'
-      badge.setAttribute('aria-label', 'Stream status: live')
-      badge.classList.remove('live-badge--offline')
-      badge.classList.add('live-badge--live')
-    } else {
-      badge.textContent = '● OFFLINE'
-      badge.setAttribute('aria-label', 'Stream status: offline')
-      badge.classList.remove('live-badge--live')
-      badge.classList.add('live-badge--offline')
-    }
-  }
-
-  // Default to online mode for now — always show the player
+  // Always attempt to start HLS; setStreamOnline() is idempotent
   setStreamOnline()
 }
