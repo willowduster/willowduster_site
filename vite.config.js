@@ -1,28 +1,25 @@
 import { defineConfig } from 'vite'
 
 export default defineConfig({
-  base: '/willowduster_site/',
+  base: '/',
   server: {
     // Proxy Owncast requests in dev to avoid CORS / mixed-content issues
     proxy: {
-      '/willowduster_site/hls': {
+      '/hls': {
         target: 'https://stream.willowduster.com',
         changeOrigin: true,
         secure: true,
-        rewrite: (path) => path.replace(/^\/willowduster_site/, ''),
       },
-      '/willowduster_site/api': {
+      '/api': {
         target: 'https://stream.willowduster.com',
         changeOrigin: true,
         secure: true,
-        rewrite: (path) => path.replace(/^\/willowduster_site/, ''),
       },
-      '/willowduster_site/ws': {
+      '/ws': {
         target: 'wss://stream.willowduster.com',
         changeOrigin: true,
         ws: true,
         secure: true,
-        rewrite: (path) => path.replace(/^\/willowduster_site/, ''),
       },
     },
   },
